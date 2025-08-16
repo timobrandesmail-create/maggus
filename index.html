@@ -189,7 +189,8 @@
 
 <script>
 /* ===== Utilities ===== */
-const $ = (id)=>document.getElementById(id);
+const byId = (id)=>document.getElementById(id);
+const qs = (sel)=>document.querySelector(sel);
 const euro = (n)=> (isFinite(n)? n:0).toLocaleString('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0});
 const pct = (x)=> Math.round((x||0)*100)+'%';
 const clamp = (n)=> (isFinite(n)? n:0);
@@ -241,8 +242,8 @@ const steps = [
 let state = {}; // will be filled
 
 /* ===== UI Build ===== */
-const stepWrap = $('stepWrap'), progress = $('progress');
-const btnNext = $('next'), btnBack = $('back'), btnEx = $('example');
+const stepWrap = byId('stepWrap'), progress = byId('progress');
+const btnNext = byId('next'), btnBack = byId('back'), btnEx = byId('example');
 
 function buildProgress(i){
   progress.innerHTML = '';
@@ -275,7 +276,7 @@ function buildStep(i){
     </div>`;
   // preload existing state
   s.fields.forEach(f=>{
-    const el = document.getElementById(f.id);
+    const el = byId(f.id);
     if(el && state[f.id]!=null){ el.value = state[f.id]; }
     el?.addEventListener('input', ()=>{ grabValues(i); computePreview(); validate(i); });
     el?.addEventListener('change', ()=>{ grabValues(i); computePreview(); validate(i); });
@@ -285,7 +286,7 @@ function buildStep(i){
 
 function grabValues(i){
   steps[i].fields.forEach(f=>{
-    const el = document.getElementById(f.id);
+    const el = byId(f.id);
     if(!el) return;
     if(f.type==='select') state[f.id] = el.value;
     else if(f.type==='text') state[f.id] = el.value.trim();
@@ -295,15 +296,13 @@ function grabValues(i){
 }
 
 function validate(i){
-  // minimale Validierung: Einnahmen-Schritt braucht positive Zahl etc.
+  // minimale Validierung
   let ok = true;
   if(steps[i].key==='income'){
-    ok = (Number($('#income')?.value)||0) >= 0;
+    ok = (Number(qs('#income')?.value)||0) >= 0;
   }
   btnNext.disabled = !ok;
 }
-
-function $(sel){ return document.querySelector(sel); } // overwrite for quick CSS selector too
 
 /* ===== Preview KPIs (right card) ===== */
 function computePreview(){
@@ -319,7 +318,7 @@ function computePreview(){
 
   // paint
   const tone = (val,g,w)=> val>=g? 'tone-good' : (val>=w? 'tone-warn':'tone-bad');
-  const el = (id, txt, t)=>{ const k = document.getElementById(id); if(!k) return; k.className='kpi '+(t||''); k.lastElementChild.textContent = txt; };
+  const el = (id, txt, t)=>{ const k = byId(id); if(!k) return; k.className='kpi '+(t||''); k.lastElementChild.textContent = txt; };
 
   el('kpi_cash', euro(surplus), tone(surplus, 0, - (income*0.05)));
   el('kpi_savings', pct(Math.max(0,savingsRate)), tone(savingsRate, .2, .1));
@@ -329,7 +328,7 @@ function computePreview(){
 
 /* ===== Results ===== */
 function showResults(){
-  document.getElementById('resultsPanel').hidden = false;
+  byId('resultsPanel').hidden = false;
   // KPIs
   const income = (state.income||0)+(state.otherInc||0);
   const fixed = (state.rent||0)+(state.utilities||0)+(state.transport||0)+(state.groceries||0)+(state.health||0)+(state.insuranceSpend||0)+(state.subscriptions||0)+(state.leisure||0)+(state.otherSpend||0);
@@ -341,14 +340,14 @@ function showResults(){
   const runwayTarget = state.runway||6;
   const runwayMonths = totalExp>0 ? (state.cash||0)/totalExp : 0;
 
-  const r = (id, label, val)=>{ $(id).innerHTML = `<span><span class="lab">${label}</span></span><span class="val">${val}</span>`; };
+  const r = (sel, label, val)=>{ qs(sel).innerHTML = `<span><span class="lab">${label}</span></span><span class="val">${val}</span>`; };
   r('#res_cash','Monatsüberschuss', euro(surplus));
   r('#res_savings','Sparquote', pct(Math.max(0,savingsRate)));
   r('#res_dti','Schuldendienst', pct(dti));
   r('#res_runway','Runway', (runwayMonths||0).toFixed(1)+' Mo (Ziel '+(runwayTarget||6)+')');
 
   // Sparkline
-  const spark = $('#spark').getContext('2d');
+  const spark = qs('#spark').getContext('2d');
   spark.canvas.width = spark.canvas.clientWidth*devicePixelRatio; spark.canvas.height = spark.canvas.clientHeight*devicePixelRatio;
   spark.clearRect(0,0,spark.canvas.width,spark.canvas.height);
   const months = 12, m = Math.max(surplus,0);
@@ -369,7 +368,7 @@ function showResults(){
   spark.closePath(); spark.fillStyle = grd; spark.fill();
 
   // Donut
-  const pie = $('#pie').getContext('2d');
+  const pie = qs('#pie').getContext('2d');
   pie.canvas.width = pie.canvas.clientWidth*devicePixelRatio; pie.canvas.height = pie.canvas.clientHeight*devicePixelRatio;
   pie.clearRect(0,0,pie.canvas.width,pie.canvas.height);
   const data = [
@@ -386,14 +385,14 @@ function showResults(){
     pie.strokeStyle = d.color; pie.lineWidth = Math.max(18*devicePixelRatio, r*0.25); pie.lineCap='round'; pie.stroke();
     start+=ang;
   });
-  $('#legend').innerHTML = data.map(d=>`<span class="item"><span class="dotx" style="background:${d.color}"></span> ${d.name}: <b>${euro(d.value)}</b></span>`).join('');
-  $('#spendText').textContent = `Gesamtausgaben: ${euro(totalExp)} (Fixkosten ${euro(fixed-debtPay)}, Schulden ${euro(debtPay)}).`;
+  qs('#legend').innerHTML = data.map(d=>`<span class="item"><span class="dotx" style="background:${d.color}"></span> ${d.name}: <b>${euro(d.value)}</b></span>`).join('');
+  qs('#spendText').textContent = `Gesamtausgaben: ${euro(totalExp)} (Fixkosten ${euro(fixed-debtPay)}, Schulden ${euro(debtPay)}).`;
 
   // Bars: Net worth
   const assets = (state.cash||0)+(state.invest||0)+(state.pension||0)+(state.realestate||0);
   const debts = (state.debtTotal||0);
   const net = assets - debts;
-  const bars = $('#bars').getContext('2d');
+  const bars = qs('#bars').getContext('2d');
   bars.canvas.width = bars.canvas.clientWidth*devicePixelRatio; bars.canvas.height = bars.canvas.clientHeight*devicePixelRatio;
   bars.clearRect(0,0,bars.canvas.width,bars.canvas.height);
   const vals=[{n:'Vermögen',v:assets},{n:'Schulden',v:debts},{n:'Netto',v:net}];
@@ -407,7 +406,7 @@ function showResults(){
     bars.fillRect(x0, y0-hbar, wbar, hbar);
     bars.fillStyle = '#94a3b8'; bars.font = `${12*devicePixelRatio}px system-ui`; bars.fillText(x.n, x0, y0+12*devicePixelRatio);
   });
-  $('#nwText').textContent = `Nettovermögen: ${euro(net)} (Vermögen ${euro(assets)} / Schulden ${euro(debts)}).`;
+  qs('#nwText').textContent = `Nettovermögen: ${euro(net)} (Vermögen ${euro(assets)} / Schulden ${euro(debts)}).`;
 
   // Versicherungen
   const ins = [];
@@ -415,7 +414,7 @@ function showResults(){
   if(state.ins_beruf==='keine' && (state.age||0) < 50) ins.push('BU nicht vorhanden – prüfen, ob Absicherung des Einkommens sinnvoll ist.');
   if(state.ins_hausrat==='keine' && (state.rent||0)>0) ins.push('Hausrat fehlt – optional, aber bei teurer Einrichtung sinnvoll.');
   if(!ins.length) ins.push('Kern-Absicherungen wirken vorhanden; Tarife & Deckungssummen regelmäßig prüfen.');
-  $('#insList').innerHTML = ins.map(t=>`<li>${t}</li>`).join('');
+  byId('insList').innerHTML = ins.map(t=>`<li>${t}</li>`).join('');
 
   // Plan (Ziele & Hinweise)
   const plan = [];
@@ -440,14 +439,14 @@ function showResults(){
   ['goal1','goal2','goal3'].forEach((g,i)=>{
     const v = state[g]||0; if(v>0) plan.push(`Ziel ${i+1}: ${euro(v)} – Rate festlegen und Zeitachse definieren.`);
   });
-  $('#plan').innerHTML = plan.map(t=>`<li>${t}</li>`).join('');
+  byId('plan').innerHTML = plan.map(t=>`<li>${t}</li>`).join('');
 
   // Tab handlers
   document.querySelectorAll('.tab').forEach(t=> t.onclick = ()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     t.classList.add('active');
     document.querySelectorAll('.section').forEach(s=> s.classList.remove('active'));
-    $('#sec_'+t.dataset.t).classList.add('active');
+    qs('#sec_'+t.dataset.t).classList.add('active');
   });
 }
 
@@ -476,12 +475,12 @@ btnEx.onclick = ()=>{
 };
 
 /* ===== Results toolbar ===== */
-$('restart').onclick = ()=>{ state={}; localStorage.removeItem('finWizardV1'); go(0); $('resultsPanel').hidden=true; };
-$('saveHtml').onclick = ()=>{
+byId('restart').onclick = ()=>{ state={}; localStorage.removeItem('finWizardV1'); go(0); byId('resultsPanel').hidden=true; };
+byId('saveHtml').onclick = ()=>{
   const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'finanz-wizard.html'; a.click(); URL.revokeObjectURL(a.href);
 };
-$('print').onclick = ()=> window.print();
+byId('print').onclick = ()=> window.print();
 
 /* ===== Init ===== */
 try{ const saved = JSON.parse(localStorage.getItem('finWizardV1')||'null'); if(saved) state = saved; }catch(e){}
