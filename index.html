@@ -1,490 +1,157 @@
 <!doctype html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0ea5e9">
-<title>Finanz-TÜV – Geführter Assistent</title>
-<style>
-  :root{
-    --bg:#0b1220; --panel:rgba(255,255,255,.06); --ink:#e5e7eb; --muted:#9aa4b2; --ring:rgba(255,255,255,.12);
-    --brand:#22d3ee; --good:#10b981; --warn:#f59e0b; --bad:#ef4444; --r:16px; --shadow:0 10px 28px rgba(2,8,23,.35);
-  }
-  @media (prefers-color-scheme: light){
-    :root{--bg:#f8fafc;--panel:#fff;--ink:#0f172a;--muted:#64748b;--ring:#e2e8f0; --shadow:0 8px 18px rgba(2,8,23,.06)}
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0}
-  body{
-    font:16px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;
-    color:var(--ink);
-    background:
-      radial-gradient(1200px 600px at 100% -10%, rgba(34,211,238,.15), transparent 60%),
-      radial-gradient(1000px 500px at -10% 0%, rgba(99,102,241,.12), transparent 50%),
-      var(--bg);
-    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
-  }
-  .wrap{max-width:920px;margin:0 auto;padding:18px 16px calc(env(safe-area-inset-bottom)+18px)}
-  header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-  .logo{width:32px;height:32px;border-radius:10px;background:conic-gradient(from 200deg,#67e8f9,#a78bfa,#67e8f9)}
-  h1{font-size:18px;margin:0} .sub{font-size:12px;color:var(--muted)}
-  .grid{display:grid;gap:12px}
-  @media(min-width:860px){ .grid{grid-template-columns: 2fr 1fr} }
-
-  .panel{background:var(--panel);border:1px solid var(--ring);border-radius:var(--r);box-shadow:var(--shadow)}
-  .in{padding:14px}
-
-  /* Wizard */
-  .steps{display:flex;gap:8px;align-items:center;margin:6px 0 12px}
-  .dot{flex:1;height:6px;border-radius:999px;background:linear-gradient(90deg, var(--brand), transparent);opacity:.25}
-  .dot.on{opacity:1}
-  .stepTitle{font-weight:700;margin-bottom:8px}
-  .fields{display:grid;gap:10px}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  label{font-size:12px;color:var(--muted);display:block;margin:0 0 6px 2px}
-  input[type=number],input[type=text],select{
-    width:100%;height:48px;border-radius:12px;border:1px solid var(--ring);background:transparent;color:var(--ink);padding:0 14px;font-size:16px
-  }
-  input:focus,select:focus{outline:2px solid color-mix(in srgb, var(--brand) 60%, transparent)}
-
-  /* Side card (live preview) */
-  .card{background:rgba(255,255,255,.05);border:1px solid var(--ring);border-radius:14px}
-  .kpi{display:flex;justify-content:space-between;border:1px solid var(--ring);border-radius:12px;padding:10px;background:rgba(255,255,255,.04)}
-  .kpi .lab{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-  .kpi .val{font-weight:700}
-  .tone-good{color:#065f46;background:#ecfdf5;border-color:#a7f3d0}
-  .tone-warn{color:#92400e;background:#fffbeb;border-color:#fde68a}
-  .tone-bad{color:#991b1b;background:#fef2f2;border-color:#fecaca}
-  .muted{color:var(--muted)}
-  .small{font-size:12px}
-
-  /* Nav buttons */
-  .nav{display:flex;gap:8px;justify-content:space-between;margin-top:10px}
-  .btn{height:44px;border-radius:12px;border:1px solid var(--ring);background:rgba(255,255,255,.06);color:var(--ink);padding:0 14px;display:inline-flex;align-items:center;gap:8px}
-  .btn.primary{background:linear-gradient(135deg,#06b6d4,#22d3ee);color:#001019;font-weight:700}
-  .btn:disabled{opacity:.5;pointer-events:none}
-
-  /* Results */
-  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
-  .tab{border:1px solid var(--ring);padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.05);cursor:pointer}
-  .tab.active{background:linear-gradient(135deg,#06b6d4,#22d3ee);color:#001019;font-weight:700}
-  .section{display:none}
-  .section.active{display:block}
-  .legend{display:flex;gap:10px;flex-wrap:wrap;margin:6px 2px 0}
-  .dotx{width:10px;height:10px;border-radius:50%}
-  canvas{max-width:100%}
-
-  @media print{ .steps,.nav{display:none} body{background:#fff} .panel{background:#fff} }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Finanz-TÜV</title>
+  <style>
+    :root{
+      --bg:#0b1220; --panel:rgba(255,255,255,.06); --ink:#e5e7eb; --muted:#94a3b8; --ring:rgba(255,255,255,.12);
+      --brand:#22d3ee; --good:#10b981; --warn:#f59e0b; --bad:#ef4444;
+    }
+    body{margin:0;font-family:sans-serif;background:var(--bg);color:var(--ink);}
+    h1,h2{margin:0}
+    button{cursor:pointer}
+    .page{display:none;padding:20px;max-width:600px;margin:auto}
+    .active{display:block}
+    .center{text-align:center}
+    .panel{background:var(--panel);padding:20px;border-radius:12px;margin:20px 0}
+    label{display:block;margin:10px 0 4px}
+    input{width:100%;padding:10px;border-radius:8px;border:1px solid var(--ring);background:transparent;color:var(--ink)}
+    .nav{display:flex;justify-content:space-between;margin-top:20px}
+    .btn{padding:10px 20px;border:none;border-radius:8px;background:var(--brand);color:#000;font-weight:600}
+    .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+    .kpi{background:var(--panel);padding:12px;border-radius:10px;text-align:center}
+    .lab{font-size:12px;color:var(--muted)}
+    .val{font-size:18px;font-weight:bold}
+    canvas{max-width:100%}
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="logo" aria-hidden="true"></div>
-      <div><h1>Finanz-TÜV – Geführter Assistent</h1><div class="sub">Schritt für Schritt · mobil & desktop · offline nutzbar</div></div>
-    </header>
 
-    <div class="grid">
-      <!-- Wizard left -->
-      <div class="panel">
-        <div class="in">
-          <div class="steps" id="progress"></div>
-          <div id="stepWrap"></div>
-          <div class="nav">
-            <button class="btn" id="back">← Zurück</button>
-            <div style="display:flex;gap:8px">
-              <button class="btn" id="example">✨ Beispiel</button>
-              <button class="btn primary" id="next">Weiter →</button>
-            </div>
-          </div>
-        </div>
-      </div>
+<!-- Landing -->
+<div id="landing" class="page active center">
+  <h1>🚀 Finanz-TÜV</h1>
+  <p>Mach deinen persönlichen Finanz-Check: Einnahmen, Ausgaben, Schulden und Ziele analysieren – übersichtlich und modern.</p>
+  <button class="btn" onclick="showPage('wizard')">Jetzt starten</button>
+</div>
 
-      <!-- Live Preview right -->
-      <div class="panel">
-        <div class="in">
-          <div style="font-weight:700;margin-bottom:6px">Zwischenstand</div>
-          <div class="grid" style="gap:8px">
-            <div class="kpi" id="kpi_cash"><span><span class="lab">Monatsüberschuss</span></span><span class="val">–</span></div>
-            <div class="kpi" id="kpi_savings"><span><span class="lab">Sparquote</span></span><span class="val">–</span></div>
-            <div class="kpi" id="kpi_dti"><span><span class="lab">Schuldendienst</span></span><span class="val">–</span></div>
-            <div class="kpi" id="kpi_runway"><span><span class="lab">Notgroschen-Runway</span></span><span class="val">–</span></div>
-          </div>
-          <div class="muted small" style="margin-top:8px">Hinweis: Schätzwerte, kein Finanz-/Steuerrat.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Results -->
-    <div class="panel" style="margin-top:12px" id="resultsPanel" hidden>
-      <div class="in">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
-          <div style="font-weight:700">Ergebnis & Analyse</div>
-          <div>
-            <button class="btn" id="restart">↺ Neu starten</button>
-            <button class="btn" id="saveHtml">⬇︎ Als HTML speichern</button>
-            <button class="btn" id="print">🖨️ PDF</button>
-          </div>
-        </div>
-        <div class="tabs" id="tabs">
-          <div class="tab active" data-t="cash">Cashflow & Kennzahlen</div>
-          <div class="tab" data-t="spend">Ausgaben-Mix</div>
-          <div class="tab" data-t="networth">Vermögen & Schulden</div>
-          <div class="tab" data-t="ins">Versicherungen</div>
-          <div class="tab" data-t="goals">Ziele & Plan</div>
-        </div>
-
-        <section class="section active" id="sec_cash">
-          <div class="grid" style="gap:10px">
-            <div class="card in">
-              <div style="font-weight:700;margin-bottom:6px">Kern-KPIs</div>
-              <div class="grid" style="gap:8px">
-                <div class="kpi" id="res_cash"></div>
-                <div class="kpi" id="res_savings"></div>
-                <div class="kpi" id="res_dti"></div>
-                <div class="kpi" id="res_runway"></div>
-              </div>
-            </div>
-            <div class="card in">
-              <div style="font-weight:700;margin-bottom:6px">Spar-Projektion (12 Monate)</div>
-              <canvas id="spark" height="64"></canvas>
-              <div class="muted small">Kumuliert bei konstantem Überschuss.</div>
-            </div>
-          </div>
-        </section>
-
-        <section class="section" id="sec_spend">
-          <div class="card in">
-            <div style="font-weight:700;margin-bottom:6px">Ausgaben-Donut</div>
-            <canvas id="pie" height="220"></canvas>
-            <div class="legend" id="legend"></div>
-            <div class="muted small" id="spendText"></div>
-          </div>
-        </section>
-
-        <section class="section" id="sec_networth">
-          <div class="card in">
-            <div style="font-weight:700;margin-bottom:6px">Vermögen vs. Schulden</div>
-            <canvas id="bars" height="180"></canvas>
-            <div class="muted small" id="nwText"></div>
-          </div>
-        </section>
-
-        <section class="section" id="sec_ins">
-          <div class="card in">
-            <div style="font-weight:700;margin-bottom:6px">Versicherungs-Check</div>
-            <ul id="insList" class="small" style="margin:0;padding-left:18px"></ul>
-          </div>
-        </section>
-
-        <section class="section" id="sec_goals">
-          <div class="card in">
-            <div style="font-weight:700;margin-bottom:6px">Ziele & Maßnahmen</div>
-            <ul id="plan" class="small" style="margin:0;padding-left:18px"></ul>
-          </div>
-        </section>
-      </div>
-    </div>
+<!-- Wizard -->
+<div id="wizard" class="page">
+  <h2>Deine Eingaben</h2>
+  <div id="step1" class="panel step">
+    <label>Einkommen (Netto/Monat €)</label>
+    <input type="number" id="income" placeholder="z. B. 3200">
+    <div class="nav"><span></span><button class="btn" onclick="nextStep(2)">Weiter</button></div>
   </div>
+  <div id="step2" class="panel step" style="display:none">
+    <label>Fixkosten (Miete, Nebenkosten etc. €/Monat)</label>
+    <input type="number" id="fixed" placeholder="z. B. 1800">
+    <div class="nav"><button class="btn" onclick="nextStep(1)">Zurück</button><button class="btn" onclick="nextStep(3)">Weiter</button></div>
+  </div>
+  <div id="step3" class="panel step" style="display:none">
+    <label>Kreditrate (€/Monat)</label>
+    <input type="number" id="debt" placeholder="z. B. 250">
+    <label>Notgroschen (Betrag €)</label>
+    <input type="number" id="emerg" placeholder="z. B. 5000">
+    <div class="nav"><button class="btn" onclick="nextStep(2)">Zurück</button><button class="btn" onclick="nextStep(4)">Weiter</button></div>
+  </div>
+  <div id="step4" class="panel step" style="display:none">
+    <label>Wunsch-Rente (Netto €/Monat)</label>
+    <input type="number" id="retire" placeholder="z. B. 2000">
+    <div class="nav"><button class="btn" onclick="nextStep(3)">Zurück</button><button class="btn" onclick="finish()">Analyse anzeigen</button></div>
+  </div>
+</div>
+
+<!-- Ergebnisse -->
+<div id="results" class="page">
+  <h2>Deine Ergebnisse</h2>
+  <div class="kpis" id="kpis"></div>
+  <canvas id="pie" width="300" height="300"></canvas>
+  <p id="legend"></p>
+  <canvas id="spark" width="300" height="80"></canvas>
+  <div class="panel">
+    <h3>Mini-Maßnahmenplan</h3>
+    <ul id="plan"></ul>
+  </div>
+  <div class="center"><button class="btn" onclick="showPage('landing')">Neu starten</button></div>
+</div>
 
 <script>
-/* ===== Utilities ===== */
-const byId = (id)=>document.getElementById(id);
-const qs = (sel)=>document.querySelector(sel);
-const euro = (n)=> (isFinite(n)? n:0).toLocaleString('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0});
-const pct = (x)=> Math.round((x||0)*100)+'%';
-const clamp = (n)=> (isFinite(n)? n:0);
+let state={income:0,fixed:0,debt:0,emerg:0,retire:0};
 
-/* ===== State ===== */
-const steps = [
-  { key:'profile', title:'1/6 – Profil', fields:[
-    {id:'name', label:'Name (optional)', type:'text', placeholder:'z. B. Sam'},
-    {id:'age', label:'Alter', type:'number', step:1},
-    {id:'runway', label:'Ziel-Notgroschen (Monate)', type:'number', step:1, def:6}
-  ]},
-  { key:'income', title:'2/6 – Einnahmen', fields:[
-    {id:'income', label:'Netto-Einkommen mtl. (€)', type:'number', step:50, def:3200},
-    {id:'otherInc', label:'Sonstige Einnahmen mtl. (€)', type:'number', step:50, def:0}
-  ]},
-  { key:'spend', title:'3/6 – Ausgaben (mtl.)', two:true, fields:[
-    {id:'rent', label:'Wohnen/Miete', type:'number', step:50, def:900},
-    {id:'utilities', label:'Neben-/Energie', type:'number', step:20, def:200},
-    {id:'transport', label:'Mobilität', type:'number', step:20, def:180},
-    {id:'groceries', label:'Lebensmittel', type:'number', step:20, def:320},
-    {id:'health', label:'Gesundheit', type:'number', step:20, def:60},
-    {id:'insuranceSpend', label:'Versicherungen (Prämien)', type:'number', step:20, def:90},
-    {id:'subscriptions', label:'Abos/Telefon/Internet', type:'number', step:10, def:60},
-    {id:'leisure', label:'Freizeit/Restaurant', type:'number', step:20, def:140},
-    {id:'otherSpend', label:'Sonstiges', type:'number', step:20, def:50},
-    {id:'debtPay', label:'Kreditrate(n)', type:'number', step:20, def:0},
-  ]},
-  { key:'networth', title:'4/6 – Vermögen & Schulden', two:true, fields:[
-    {id:'cash', label:'Cash/Notgroschen (€)', type:'number', step:100, def:3000},
-    {id:'invest', label:'Depot/ETF (€)', type:'number', step:200, def:5000},
-    {id:'pension', label:'Renten-/bAV-Anwartschaft (€)', type:'number', step:500, def:0},
-    {id:'realestate', label:'Immobilien-Eigenkapital (€)', type:'number', step:500, def:0},
-    {id:'debtTotal', label:'Schulden gesamt (€)', type:'number', step:500, def:0}
-  ]},
-  { key:'insurance', title:'5/6 – Versicherungen', fields:[
-    {id:'ins_haftpfl', label:'Privat-Haftpflicht', type:'select', options:['keine','Basis','gut','weiß nicht'], def:'gut'},
-    {id:'ins_hausrat', label:'Hausrat', type:'select', options:['keine','ja','weiß nicht'], def:'ja'},
-    {id:'ins_beruf', label:'Berufsunfähigkeit (BU)', type:'select', options:['keine','ja','weiß nicht'], def:'keine'},
-    {id:'ins_kranken', label:'Kranken/Zusatz', type:'select', options:['gesetzl.','privat','Zusatz','weiß nicht'], def:'gesetzl.'}
-  ]},
-  { key:'goals', title:'6/6 – Ziele', fields:[
-    {id:'goal1', label:'Kurzfristig Ziel (z. B. Urlaub, €)', type:'number', step:50, def:0},
-    {id:'goal2', label:'Mittelfristig Ziel (z. B. Auto, €)', type:'number', step:100, def:0},
-    {id:'goal3', label:'Langfristig Ziel (z. B. Eigenkapital, €)', type:'number', step:500, def:0},
-    {id:'retire', label:'Wunsch-Rente netto (€/Monat)', type:'number', step:50, def:0}
-  ]}
-];
-
-let state = {}; // will be filled
-
-/* ===== UI Build ===== */
-const stepWrap = byId('stepWrap'), progress = byId('progress');
-const btnNext = byId('next'), btnBack = byId('back'), btnEx = byId('example');
-
-function buildProgress(i){
-  progress.innerHTML = '';
-  for(let s=0;s<steps.length;s++){
-    const el = document.createElement('div');
-    el.className = 'dot'+(s<=i?' on':'');
-    progress.appendChild(el);
-  }
-}
-function fieldHtml(f){
-  const common = `id="${f.id}" ${f.placeholder?`placeholder="${f.placeholder}"`:''} ${f.step?`step="${f.step}"`:''}`;
-  if(f.type==='select'){
-    return `
-      <label for="${f.id}">${f.label}</label>
-      <select ${common}>
-        ${f.options.map(o=>`<option ${o===f.def?'selected':''}>${o}</option>`).join('')}
-      </select>`;
-  }
-  return `
-    <label for="${f.id}">${f.label}</label>
-    <input type="${f.type}" ${common} value="${f.def??''}">`;
-}
-function buildStep(i){
-  const s = steps[i];
-  const rows = s.fields.map(f=> `<div>${fieldHtml(f)}</div>`);
-  stepWrap.innerHTML = `
-    <div class="stepTitle">${s.title}</div>
-    <div class="fields ${s.two?'grid2':''}">
-      ${rows.join('')}
-    </div>`;
-  // preload existing state
-  s.fields.forEach(f=>{
-    const el = byId(f.id);
-    if(el && state[f.id]!=null){ el.value = state[f.id]; }
-    el?.addEventListener('input', ()=>{ grabValues(i); computePreview(); validate(i); });
-    el?.addEventListener('change', ()=>{ grabValues(i); computePreview(); validate(i); });
-  });
-  validate(i);
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-function grabValues(i){
-  steps[i].fields.forEach(f=>{
-    const el = byId(f.id);
-    if(!el) return;
-    if(f.type==='select') state[f.id] = el.value;
-    else if(f.type==='text') state[f.id] = el.value.trim();
-    else state[f.id] = Number(el.value)||0;
-  });
-  localStorage.setItem('finWizardV1', JSON.stringify(state));
+function nextStep(n){
+  document.querySelectorAll('.step').forEach(s=>s.style.display="none");
+  document.getElementById("step"+n).style.display="block";
 }
 
-function validate(i){
-  // minimale Validierung
-  let ok = true;
-  if(steps[i].key==='income'){
-    ok = (Number(qs('#income')?.value)||0) >= 0;
-  }
-  btnNext.disabled = !ok;
+function finish(){
+  state.income=+document.getElementById('income').value||0;
+  state.fixed=+document.getElementById('fixed').value||0;
+  state.debt=+document.getElementById('debt').value||0;
+  state.emerg=+document.getElementById('emerg').value||0;
+  state.retire=+document.getElementById('retire').value||0;
+  renderResults();
+  showPage('results');
 }
 
-/* ===== Preview KPIs (right card) ===== */
-function computePreview(){
-  const income = (state.income||0) + (state.otherInc||0);
-  const fixed = (state.rent||0)+(state.utilities||0)+(state.transport||0)+(state.groceries||0)+(state.health||0)+(state.insuranceSpend||0)+(state.subscriptions||0)+(state.leisure||0)+(state.otherSpend||0);
-  const debtPay = (state.debtPay||0);
-  const totalExp = fixed + debtPay;
-  const surplus = income - totalExp;
-  const savingsRate = income>0 ? surplus/income : 0;
-  const dti = income>0 ? debtPay/income : 0;
-  const runwayTarget = state.runway||6;
-  const runwayMonths = totalExp>0 ? (state.cash||0)/totalExp : 0;
+function euro(n){return (isFinite(n)?n:0).toLocaleString('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0});}
 
-  // paint
-  const tone = (val,g,w)=> val>=g? 'tone-good' : (val>=w? 'tone-warn':'tone-bad');
-  const el = (id, txt, t)=>{ const k = byId(id); if(!k) return; k.className='kpi '+(t||''); k.lastElementChild.textContent = txt; };
+function renderResults(){
+  const totalExp=state.fixed+state.debt;
+  const surplus=state.income-totalExp;
+  const savingsRate=state.income?surplus/state.income:0;
+  const dti=state.income?state.debt/state.income:0;
+  const runway=totalExp?state.emerg/totalExp:0;
+  const expectedState=state.income*0.40;
+  const pensionGap=Math.max(state.retire-expectedState,0);
+  const capNeed=pensionGap? pensionGap*12/0.035:0;
 
-  el('kpi_cash', euro(surplus), tone(surplus, 0, - (income*0.05)));
-  el('kpi_savings', pct(Math.max(0,savingsRate)), tone(savingsRate, .2, .1));
-  el('kpi_dti', pct(dti), dti<=.2? 'tone-good' : dti<=.35? 'tone-warn':'tone-bad');
-  el('kpi_runway', (runwayMonths||0).toFixed(1)+' Mo', runwayMonths>=runwayTarget? 'tone-good' : runwayMonths>=runwayTarget*0.6? 'tone-warn':'tone-bad');
-}
+  const kpiHTML=`
+    <div class="kpi"><div class="lab">Überschuss</div><div class="val">${euro(surplus)}</div></div>
+    <div class="kpi"><div class="lab">Sparquote</div><div class="val">${Math.round(savingsRate*100)}%</div></div>
+    <div class="kpi"><div class="lab">Schuldenquote</div><div class="val">${Math.round(dti*100)}%</div></div>
+    <div class="kpi"><div class="lab">Runway</div><div class="val">${runway.toFixed(1)} Mo</div></div>
+  `;
+  document.getElementById('kpis').innerHTML=kpiHTML;
 
-/* ===== Results ===== */
-function showResults(){
-  byId('resultsPanel').hidden = false;
-  // KPIs
-  const income = (state.income||0)+(state.otherInc||0);
-  const fixed = (state.rent||0)+(state.utilities||0)+(state.transport||0)+(state.groceries||0)+(state.health||0)+(state.insuranceSpend||0)+(state.subscriptions||0)+(state.leisure||0)+(state.otherSpend||0);
-  const debtPay = (state.debtPay||0);
-  const totalExp = fixed + debtPay;
-  const surplus = income - totalExp;
-  const savingsRate = income>0? surplus/income : 0;
-  const dti = income>0? debtPay/income : 0;
-  const runwayTarget = state.runway||6;
-  const runwayMonths = totalExp>0 ? (state.cash||0)/totalExp : 0;
-
-  const r = (sel, label, val)=>{ qs(sel).innerHTML = `<span><span class="lab">${label}</span></span><span class="val">${val}</span>`; };
-  r('#res_cash','Monatsüberschuss', euro(surplus));
-  r('#res_savings','Sparquote', pct(Math.max(0,savingsRate)));
-  r('#res_dti','Schuldendienst', pct(dti));
-  r('#res_runway','Runway', (runwayMonths||0).toFixed(1)+' Mo (Ziel '+(runwayTarget||6)+')');
-
-  // Sparkline
-  const spark = qs('#spark').getContext('2d');
-  spark.canvas.width = spark.canvas.clientWidth*devicePixelRatio; spark.canvas.height = spark.canvas.clientHeight*devicePixelRatio;
-  spark.clearRect(0,0,spark.canvas.width,spark.canvas.height);
-  const months = 12, m = Math.max(surplus,0);
-  const arr = Array.from({length:months}, (_,i)=> m*(i+1));
-  const max = Math.max(...arr,1);
-  spark.lineWidth = 2*devicePixelRatio; spark.strokeStyle = '#22d3ee';
-  spark.beginPath();
-  arr.forEach((v,i)=>{
-    const x = (i/(months-1))*(spark.canvas.width-6*devicePixelRatio)+3*devicePixelRatio;
-    const y = spark.canvas.height - (v/max)*(spark.canvas.height-6*devicePixelRatio)-3*devicePixelRatio;
-    if(i===0) spark.moveTo(x,y); else spark.lineTo(x,y);
-  });
-  spark.stroke();
-  const grd = spark.createLinearGradient(0,0,0,spark.canvas.height);
-  grd.addColorStop(0,'rgba(34,211,238,.35)'); grd.addColorStop(1,'rgba(34,211,238,0)');
-  spark.lineTo(spark.canvas.width-3*devicePixelRatio, spark.canvas.height-3*devicePixelRatio);
-  spark.lineTo(3*devicePixelRatio, spark.canvas.height-3*devicePixelRatio);
-  spark.closePath(); spark.fillStyle = grd; spark.fill();
-
-  // Donut
-  const pie = qs('#pie').getContext('2d');
-  pie.canvas.width = pie.canvas.clientWidth*devicePixelRatio; pie.canvas.height = pie.canvas.clientHeight*devicePixelRatio;
-  pie.clearRect(0,0,pie.canvas.width,pie.canvas.height);
-  const data = [
-    {name:'Fixkosten', value:Math.max(fixed-debtPay,0), color:'#60a5fa'},
-    {name:'Schulden', value:Math.max(debtPay,0), color:'#fb923c'},
-    {name:'Überschuss', value:Math.max(surplus,0), color:'#34d399'}
-  ];
-  const total = data.reduce((a,b)=>a+b.value,0)||1;
-  const w = pie.canvas.width, h = pie.canvas.height, cx=w/2, cy=h/2, r=Math.min(w,h)/2 - 12*devicePixelRatio;
+  const ctx=document.getElementById('pie').getContext('2d');
+  const data=[state.fixed,state.debt,Math.max(surplus,0)];
+  const colors=['#60a5fa','#fb923c','#34d399'];
+  const total=data.reduce((a,b)=>a+b,0)||1;
   let start=-Math.PI/2;
-  data.forEach(d=>{
-    const ang = (d.value/total)*Math.PI*2;
-    pie.beginPath(); pie.arc(cx,cy,r,start,start+ang);
-    pie.strokeStyle = d.color; pie.lineWidth = Math.max(18*devicePixelRatio, r*0.25); pie.lineCap='round'; pie.stroke();
+  ctx.clearRect(0,0,300,300);
+  data.forEach((v,i)=>{
+    const ang=v/total*2*Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(150,150);
+    ctx.arc(150,150,140,start,start+ang);
+    ctx.fillStyle=colors[i];
+    ctx.fill();
     start+=ang;
   });
-  qs('#legend').innerHTML = data.map(d=>`<span class="item"><span class="dotx" style="background:${d.color}"></span> ${d.name}: <b>${euro(d.value)}</b></span>`).join('');
-  qs('#spendText').textContent = `Gesamtausgaben: ${euro(totalExp)} (Fixkosten ${euro(fixed-debtPay)}, Schulden ${euro(debtPay)}).`;
+  document.getElementById('legend').innerText=`Fixkosten ${euro(state.fixed)}, Schulden ${euro(state.debt)}, Überschuss ${euro(Math.max(surplus,0))}`;
 
-  // Bars: Net worth
-  const assets = (state.cash||0)+(state.invest||0)+(state.pension||0)+(state.realestate||0);
-  const debts = (state.debtTotal||0);
-  const net = assets - debts;
-  const bars = qs('#bars').getContext('2d');
-  bars.canvas.width = bars.canvas.clientWidth*devicePixelRatio; bars.canvas.height = bars.canvas.clientHeight*devicePixelRatio;
-  bars.clearRect(0,0,bars.canvas.width,bars.canvas.height);
-  const vals=[{n:'Vermögen',v:assets},{n:'Schulden',v:debts},{n:'Netto',v:net}];
-  const maxb = Math.max(...vals.map(x=>Math.abs(x.v)),1);
-  const bw = Math.floor((bars.canvas.width-40*devicePixelRatio)/vals.length);
-  vals.forEach((x,i)=>{
-    const x0 = 20*devicePixelRatio + i*bw + bw*0.15, wbar = bw*0.7;
-    const y0 = bars.canvas.height-20*devicePixelRatio;
-    const hbar = Math.round((Math.abs(x.v)/maxb)*(bars.canvas.height-50*devicePixelRatio));
-    bars.fillStyle = i===0?'#34d399':i===1?'#fb7185':'#22d3ee';
-    bars.fillRect(x0, y0-hbar, wbar, hbar);
-    bars.fillStyle = '#94a3b8'; bars.font = `${12*devicePixelRatio}px system-ui`; bars.fillText(x.n, x0, y0+12*devicePixelRatio);
-  });
-  qs('#nwText').textContent = `Nettovermögen: ${euro(net)} (Vermögen ${euro(assets)} / Schulden ${euro(debts)}).`;
+  const sctx=document.getElementById('spark').getContext('2d');
+  sctx.clearRect(0,0,300,80);
+  sctx.beginPath();sctx.strokeStyle=colors[2];sctx.moveTo(0,80);
+  for(let i=0;i<=12;i++){let y=80-(surplus*i/Math.max(surplus*12,1))*70; sctx.lineTo(i*25,y);}
+  sctx.stroke();
 
-  // Versicherungen
-  const ins = [];
-  if(state.ins_haftpfl==='keine') ins.push('Privat-Haftpflicht fehlt – in DE Basis-Must-Have, meist günstig.');
-  if(state.ins_beruf==='keine' && (state.age||0) < 50) ins.push('BU nicht vorhanden – prüfen, ob Absicherung des Einkommens sinnvoll ist.');
-  if(state.ins_hausrat==='keine' && (state.rent||0)>0) ins.push('Hausrat fehlt – optional, aber bei teurer Einrichtung sinnvoll.');
-  if(!ins.length) ins.push('Kern-Absicherungen wirken vorhanden; Tarife & Deckungssummen regelmäßig prüfen.');
-  byId('insList').innerHTML = ins.map(t=>`<li>${t}</li>`).join('');
-
-  // Plan (Ziele & Hinweise)
-  const plan = [];
-  if(surplus<0) plan.push('Defizit: Fixkosten senken oder Einnahmen erhöhen; zuerst auf Überschuss drehen.');
-  else if(savingsRate<.1) plan.push('Sparquote &gt; 10% anpeilen (Automatisierung, Budgets).');
-  else if(savingsRate<.2) plan.push('Solide – Ziel 20% langfristig.');
-  else plan.push('Sehr gut – Kurs halten.');
-
-  const needRun = (totalExp*(state.runway||6)) - (state.cash||0);
-  if(needRun>0) plan.push(`Notgroschen ergänzen: fehlen ca. ${euro(needRun)} für ${(state.runway||6)} Monate.`);
-
-  const expectedState = income*0.40; // grobe Heuristik
-  const pensionGap = Math.max((state.retire||0) - expectedState, 0);
-  if((state.retire||0)>0){
-    if(pensionGap>0){
-      const cap = pensionGap*12/0.035;
-      plan.push(`Rentenlücke ~ ${euro(pensionGap)}/Monat ⇒ Kapitalbedarf ~ ${euro(cap)} (3,5%-Entnahme).`);
-    } else {
-      plan.push('Keine Rentenlücke nach Heuristik – Annahmen regelmäßig prüfen.');
-    }
-  }
-  ['goal1','goal2','goal3'].forEach((g,i)=>{
-    const v = state[g]||0; if(v>0) plan.push(`Ziel ${i+1}: ${euro(v)} – Rate festlegen und Zeitachse definieren.`);
-  });
-  byId('plan').innerHTML = plan.map(t=>`<li>${t}</li>`).join('');
-
-  // Tab handlers
-  document.querySelectorAll('.tab').forEach(t=> t.onclick = ()=>{
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');
-    document.querySelectorAll('.section').forEach(s=> s.classList.remove('active'));
-    qs('#sec_'+t.dataset.t).classList.add('active');
-  });
+  const plan=[];
+  if(runway<6) plan.push(`Notgroschen erhöhen (aktuell ${runway.toFixed(1)} Monate).`);
+  if(savingsRate<0.1) plan.push("Mehr sparen, Ziel >10% Netto.");
+  if(dti>0.35) plan.push("Schuldenquote hoch – Tilgung/Umschuldung prüfen.");
+  if(pensionGap>0) plan.push(`Rentenlücke ~${euro(pensionGap)} ⇒ Kapitalbedarf ~${euro(capNeed)}.`);
+  if(plan.length===0) plan.push("Sehr solide Finanzen – weiter so!");
+  document.getElementById('plan').innerHTML=plan.map(p=>`<li>${p}</li>`).join('');
 }
-
-/* ===== Navigation ===== */
-let idx = 0;
-function go(i){
-  idx = Math.max(0, Math.min(steps.length-1, i));
-  buildProgress(idx);
-  buildStep(idx);
-  computePreview();
-  btnBack.disabled = (idx===0);
-  btnNext.textContent = (idx===steps.length-1) ? 'Ergebnis anzeigen' : 'Weiter →';
-}
-btnNext.onclick = ()=>{
-  grabValues(idx);
-  if(idx < steps.length-1){ go(idx+1); }
-  else{ showResults(); window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'}); }
-};
-btnBack.onclick = ()=> go(idx-1);
-btnEx.onclick = ()=>{
-  // Beispielwerte laden
-  state = {};
-  steps.forEach(s=> s.fields.forEach(f=> state[f.id] = (f.def!=null? f.def : (f.type==='select'? f.options?.[0] : (f.type==='text'?'':0)))));
-  localStorage.setItem('finWizardV1', JSON.stringify(state));
-  go(0);
-};
-
-/* ===== Results toolbar ===== */
-byId('restart').onclick = ()=>{ state={}; localStorage.removeItem('finWizardV1'); go(0); byId('resultsPanel').hidden=true; };
-byId('saveHtml').onclick = ()=>{
-  const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'finanz-wizard.html'; a.click(); URL.revokeObjectURL(a.href);
-};
-byId('print').onclick = ()=> window.print();
-
-/* ===== Init ===== */
-try{ const saved = JSON.parse(localStorage.getItem('finWizardV1')||'null'); if(saved) state = saved; }catch(e){}
-go(0);
 </script>
+
 </body>
 </html>
