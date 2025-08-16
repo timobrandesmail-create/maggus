@@ -50,6 +50,12 @@
   .cols{display:grid; gap:12px}
   @media(min-width:860px){ .cols{grid-template-columns: 2fr 1fr} }
   .muted{color:var(--muted)}
+  .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; border:1px solid var(--ring); background:rgba(255,255,255,.06); font-weight:700}
+  .grade{display:inline-block; min-width:28px; text-align:center; border-radius:8px; padding:2px 6px; font-weight:800}
+  .gA{background:#10b9811a; color:#10b981; border:1px solid #10b98166}
+  .gB{background:#22d3ee1a; color:#22d3ee; border:1px solid #22d3ee66}
+  .gC{background:#f59e0b1a; color:#f59e0b; border:1px solid #f59e0b66}
+  .gD{background:#ef44441a; color:#ef4444; border:1px solid #ef444466}
 </style>
 </head>
 <body>
@@ -60,11 +66,12 @@
     <div class="hero">
       <div class="logo" aria-hidden="true"></div>
       <h1>Finanz-TÜV</h1>
-      <p class="lead">Geführter Finanz-Check mit klaren Kategorien – Einnahmen, Ausgaben, Schulden, Notgroschen & Ziele. Am Ende erhältst du eine detaillierte Analyse mit Charts & Maßnahmen.</p>
+      <p class="lead">Geführter Finanz-Check mit klaren Kategorien – reine **Bewertung der Situation**, keine Produktempfehlungen. Auf Wunsch „What-if“-Szenarien & Benchmark-Vergleiche.</p>
       <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap">
         <button class="btn" onclick="showPage('wizard'); go(1)">Jetzt starten</button>
         <button class="btn ghost" onclick="loadDemo()">Beispiel laden</button>
       </div>
+      <div style="margin-top:14px"><span class="badge">🔧 TÜV-Siegel (Beta) · an DIN 77230 orientiert</span></div>
     </div>
   </section>
 
@@ -176,6 +183,12 @@
     <h2 style="margin:0 0 8px">Ergebnisse & Analyse</h2>
     <div class="kpis" id="kpis"></div>
 
+    <div class="panel">
+      <h3 style="margin:0 0 6px">Bewertung (situationsbezogen)</h3>
+      <ul id="rating" style="margin:0; padding-left:18px"></ul>
+      <div class="muted" style="margin-top:6px">Hinweis: rein indikativ, keine Produktempfehlung. „What-if“ siehe unten.</div>
+    </div>
+
     <div class="cols" style="margin-top:10px">
       <div class="panel">
         <h3 style="margin:0 0 6px">Ausgaben-Donut & Projektion</h3>
@@ -192,15 +205,16 @@
       </div>
     </div>
 
-    <!-- Sparziel-Projektion (interaktiv) -->
+    <!-- Sparziel-Projektion (interaktiv + Benchmarks) -->
     <div class="panel">
-      <h3 style="margin:0 0 6px">Sparziel-Projektion (monatlich)</h3>
+      <h3 style="margin:0 0 6px">What-if: Sparziel & Anlagevergleich</h3>
       <div class="grid2">
         <div><label>Monatlich sparen (€)</label><input type="number" id="msave" value="300" step="10"></div>
-        <div><label>Zinssatz p.a. (%)</label><input type="number" id="rate" value="5" step="0.1"></div>
+        <div><label>Zinssatz p.a. (%) – eigenes Szenario</label><input type="number" id="rate" value="5" step="0.1"></div>
         <div><label>Horizont (Jahre)</label><input type="number" id="years" value="10" step="1"></div>
       </div>
-      <canvas id="proj" height="180" style="margin-top:8px"></canvas>
+      <canvas id="proj" height="200" style="margin-top:8px"></canvas>
+      <div class="legend" id="projLegend" style="margin-top:6px"></div>
       <div class="muted" id="projText" style="margin-top:6px"></div>
     </div>
 
@@ -212,6 +226,12 @@
     <div class="panel">
       <h3 style="margin:0 0 6px">Maßnahmenplan</h3>
       <ul id="plan" style="margin:0; padding-left:18px"></ul>
+    </div>
+
+    <div class="panel">
+      <h3 style="margin:0 0 6px">Optional: persönliche Beratung</h3>
+      <p class="muted" style="margin:0 0 8px">Wenn du möchtest, kannst du auf Basis dieser Bewertung 1:1-Beratungszeit buchen (gg. Aufpreis) – rein produktneutral.</p>
+      <a class="btn" href="mailto:hello@example.com?subject=Finanz-T%C3%9CV%20Beratung&body=Hallo%2C%20ich%20h%C3%A4tte%20gern%20eine%20Beratung%20zu%20meiner%20Analyse.">Beratung anfragen</a>
     </div>
 
     <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px">
@@ -251,13 +271,9 @@ const steps = [1,2,3,4]; // step ids
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   byId(id).classList.add('active');
-  // Wenn Ergebnisse sichtbar werden → erst dann zeichnen (breite>0)
-  if(id === 'results'){
-    requestAnimationFrame(renderResults);
-  }
+  if(id === 'results'){ requestAnimationFrame(renderResults); }
 }
 function go(n){
-  // show wizard step n
   steps.forEach(s=> byId('step'+s).style.display = (s===n)?'block':'none');
   byId('stepNum').textContent = n;
   byId('stepTotal').textContent = steps.length;
@@ -265,24 +281,18 @@ function go(n){
   byId('bar').style.width = p+'%';
   byId('pct').textContent = p+'%';
 }
-function next(n){
-  persistFromDOM(); // update state before moving
-  go(n);
-}
+function next(n){ persistFromDOM(); go(n); }
 
 /* ===== DOM <-> State ===== */
 function fillDefaults(){
   Object.entries(S).forEach(([k,v])=>{
-    const el = byId(k);
-    if(el) el.value = v;
+    const el = byId(k); if(el) el.value = v;
   });
 }
 function persistFromDOM(){
   Object.keys(S).forEach(k=>{
-    const el = byId(k);
-    if(!el) return;
-    const v = el.type==='number' ? (+el.value||0) : el.value;
-    S[k]=v;
+    const el = byId(k); if(!el) return;
+    S[k] = el.type==='number' ? (+el.value||0) : el.value;
   });
   localStorage.setItem(LS, JSON.stringify(S));
 }
@@ -304,13 +314,11 @@ function resetDefaults(){
 function loadDemo(){ resetDefaults(); showPage('wizard'); go(1); }
 
 /* ===== Finish -> Analyse ===== */
-function finish(){
-  persistFromDOM();
-  showPage('results');            // Seite sichtbar machen
-  // renderResults wird in showPage via rAF getriggert
-}
+function finish(){ persistFromDOM(); showPage('results'); }
 
 /* ===== Analyse/Ergebnis ===== */
+function medal(x){ return x>=0.8?'gA':x>=0.6?'gB':x>=0.4?'gC':'gD'; }
+
 function renderResults(){
   const incomeTotal = (+S.income||0)+(+S.otherInc||0);
   const fixed = sum(S, ['rent','utilities','insPrem','telecom','transportFix','otherFix']);
@@ -340,7 +348,17 @@ function renderResults(){
     ${(+S.retire>0)? `<div class="kpi"><div class="lab">Rentenlücke</div><div class="val">${euro(pensionGap)}</div><div class="muted">Kapital ~ ${euro(capNeed)}</div></div>`:''}
   `;
 
-  // Donut (Fix / Variabel / Schulden / Überschuss)
+  // Bewertung
+  const grdSavings = savingsRate>=.2? 'A': savingsRate>=.1? 'B': savingsRate>0? 'C':'D';
+  const grdDTI = dti<=.2? 'A': dti<=.35? 'B': dti<=.5? 'C':'D';
+  const runFrac = Math.min((+S.runwayTarget>0? runwayMonths/(+S.runwayTarget):0),1);
+  byId('rating').innerHTML = `
+    <li> <span class="grade g${grdSavings}">${grdSavings}</span> Sparquote: ${Math.round(Math.max(0,savingsRate)*100)}% – Ziel mind. 10%, gut ab 20%.</li>
+    <li> <span class="grade g${grdDTI}">${grdDTI}</span> Schuldenquote (DTI): ${Math.round(dti*100)}% – < 20% top, 20–35% ok, > 35% hoch.</li>
+    <li> <span class="grade ${'g'+medal(runFrac).toUpperCase()}">${runFrac>=.8?'A':runFrac>=.6?'B':runFrac>=.4?'C':'D'}</span> Notgroschen: ${runwayMonths.toFixed(1)} Monate (Ziel ${S.runwayTarget}).</li>
+  `;
+
+  // Donut
   const pie = byId('pie').getContext('2d');
   pie.canvas.width = pie.canvas.clientWidth*devicePixelRatio;
   pie.canvas.height = pie.canvas.clientHeight*devicePixelRatio;
@@ -363,7 +381,7 @@ function renderResults(){
   byId('legend').innerHTML = data.map(d=>`<span><span class="dot" style="background:${d.c}"></span> ${d.n}: <b>${euro(d.v)}</b></span>`).join(' ');
   byId('sumTxt').textContent = `Netto ${euro(incomeTotal)} · Ausgaben ${euro(totalExp)} · Überschuss ${euro(Math.max(surplus,0))}`;
 
-  // Sparkline (12 Monate kumuliert)
+  // Sparkline
   const sp = byId('spark').getContext('2d');
   sp.canvas.width = sp.canvas.clientWidth*devicePixelRatio; sp.canvas.height = sp.canvas.clientHeight*devicePixelRatio;
   sp.clearRect(0,0,sp.canvas.width,sp.canvas.height);
@@ -384,7 +402,7 @@ function renderResults(){
   sp.lineTo(3*devicePixelRatio, sp.canvas.height-3*devicePixelRatio);
   sp.closePath(); sp.fillStyle = grd; sp.fill();
 
-  // Balken: Vermögen vs. Schulden
+  // Bars
   const bars = byId('bars').getContext('2d');
   bars.canvas.width = bars.canvas.clientWidth*devicePixelRatio; bars.canvas.height = bars.canvas.clientHeight*devicePixelRatio;
   bars.clearRect(0,0,bars.canvas.width,bars.canvas.height);
@@ -401,7 +419,7 @@ function renderResults(){
   });
   byId('nwText').textContent = `Nettovermögen: ${euro(net)} (Vermögen ${euro(assets)} / Schulden ${euro(debts)}).`;
 
-  // Breakdown-Liste
+  // Breakdown
   const cats = [
     ['Fixkosten', fixed],
     ['Variabel', variable],
@@ -412,93 +430,82 @@ function renderResults(){
     return `<li>${n}: <b>${euro(v)}</b> (${p}%)</li>`;
   }).join('');
 
-  // Plan / Empfehlungen
+  // Plan
   const plan=[];
-  if(surplus<0) plan.push('Defizit: Fixkosten & variable Ausgaben prüfen, Einnahmen erhöhen, erst auf Überschuss drehen.');
-  else if(savingsRate<.10) plan.push('Sparquote anheben: Ziel > 10% vom Netto (Lastschrift direkt nach Gehaltseingang).');
-  else if(savingsRate<.20) plan.push('Solide – mittelfristig Richtung 20% Sparquote gehen.');
+  if(surplus<0) plan.push('Defizit: Fixkosten & variable Ausgaben prüfen, Einnahmen erhöhen, zuerst Überschuss herstellen.');
+  else if(savingsRate<.10) plan.push('Sparquote > 10% anpeilen (Dauerauftrag direkt nach Geldeingang).');
+  else if(savingsRate<.20) plan.push('Solide – mittelfristig Richtung 20% gehen.');
   else plan.push('Sehr gute Sparquote – Kurs halten.');
   if(runwayMonths < (+S.runwayTarget||6)){
     const need = totalExp*(+S.runwayTarget||6) - (+S.emerg||0);
     plan.push(`Notgroschen auffüllen: fehlen ca. ${euro(Math.max(need,0))} für ${S.runwayTarget} Monate.`);
   }
-  if(dti>0.35) plan.push('Schuldenquote hoch (>35%): Tilgung/Umschuldung prüfen, variable Ausgaben senken.');
+  if(dti>0.35) plan.push('Schuldenquote >35%: Tilgung/Umschuldung prüfen; variable Ausgaben senken.');
   if(pensionGap>0) plan.push(`Rentenlücke ~ ${euro(pensionGap)}/Monat → Kapitalbedarf ~ ${euro(capNeed)} (3,5%-Entnahme).`);
-  ['goal1','goal2','goal3'].forEach((g,i)=>{ const v=+S[g]||0; if(v>0) plan.push(`Ziel ${i+1}: ${euro(v)} – feste Monatsrate und Zieltermin planen.`); });
-  if(plan.length===0) plan.push('Gesamteindruck: sehr solide – weiter beobachten und regelmäßig aktualisieren.');
+  ['goal1','goal2','goal3'].forEach((g,i)=>{ const v=+S[g]||0; if(v>0) plan.push(`Ziel ${i+1}: ${euro(v)} – feste Monatsrate & Zieltermin planen.`); });
+  if(plan.length===0) plan.push('Gesamteindruck: solide – regelmäßig aktualisieren.');
   byId('plan').innerHTML = plan.map(t=>`<li>${t}</li>`).join('');
 
-  // --- Interaktive Sparziel-Projektion initialisieren/aktualisieren ---
+  // Projection init
   ['msave','rate','years'].forEach(id=>{
-    const el = byId(id);
-    if(!el) return;
-    // Defaults aus dem State in die Felder schreiben (falls nötig)
-    if(id==='msave') el.value = S.msave;
-    if(id==='rate')  el.value = S.rate;
-    if(id==='years') el.value = S.years;
-    if(!el._bound){
-      el.addEventListener('input', renderProjection);
-      el._bound = true;
-    }
+    const el = byId(id); if(!el) return;
+    el.value = S[id];
+    if(!el._bound){ el.addEventListener('input', renderProjection); el._bound = true; }
   });
   requestAnimationFrame(renderProjection);
 }
 
-/* ===== Sparziel-Projektion ===== */
+/* ===== Sparziel-/Benchmark-Projektion ===== */
 function renderProjection(){
-  const m = Math.max(+byId('msave')?.value || +S.msave || 0, 0);     // Monatsrate
-  const rPct = +byId('rate')?.value || +S.rate || 0;                  // Zinssatz in %
-  const y = Math.max(+byId('years')?.value || +S.years || 1, 1);      // Jahre ≥ 1
+  const m = Math.max(+byId('msave')?.value || +S.msave || 0, 0);
+  const rPct = +byId('rate')?.value || +S.rate || 0;
+  const y = Math.max(+byId('years')?.value || +S.years || 1, 1);
+  S.msave = m; S.rate = rPct; S.years = y; localStorage.setItem(LS, JSON.stringify(S));
 
-  S.msave = m; S.rate = rPct; S.years = y;
-  localStorage.setItem(LS, JSON.stringify(S));
+  const n = Math.round(y*12);
+  const scen = [
+    {name:'Einzahlung (0%)', r:0, color:'#94a3b8'},
+    {name:`Szenario ${rPct}%`, r:rPct/100, color:'#22d3ee'},
+    {name:'2% p.a.', r:0.02, color:'#60a5fa'},
+    {name:'5% p.a.', r:0.05, color:'#34d399'},
+    {name:'7% p.a.', r:0.07, color:'#fb923c'}
+  ];
 
-  const r = rPct / 100;
-  const rm = Math.pow(1 + r, 1/12) - 1;
-  const n = Math.round(y * 12);
-
-  let v = 0;
-  const contrib = [], value = [];
-  for (let i = 1; i <= n; i++){
-    v = v * (1 + rm) + m; // Monatszins + Einzahlung
-    value.push(v);
-    contrib.push(m * i);  // nur Einzahlungen
-  }
+  // Build series
+  const series = scen.map(s=>{
+    const rm = Math.pow(1+s.r, 1/12)-1;
+    let v=0; const arr=[];
+    for(let i=1;i<=n;i++){ v = v*(1+rm)+m; arr.push(v); }
+    return {...s, arr};
+  });
 
   const c = byId('proj').getContext('2d');
-  c.canvas.width  = c.canvas.clientWidth  * devicePixelRatio;
-  c.canvas.height = c.canvas.clientHeight * devicePixelRatio;
+  c.canvas.width = c.canvas.clientWidth*devicePixelRatio;
+  c.canvas.height = c.canvas.clientHeight*devicePixelRatio;
   c.clearRect(0,0,c.canvas.width,c.canvas.height);
 
-  const vmax = Math.max(value.at(-1) || 1, contrib.at(-1) || 1);
-  const pad = 6 * devicePixelRatio;
-
-  function drawLine(arr, color){
-    c.lineWidth = 2 * devicePixelRatio;
-    c.strokeStyle = color;
-    c.beginPath();
-    arr.forEach((val, i)=>{
-      const x = (i/(arr.length-1)) * (c.canvas.width - 2*pad) + pad;
-      const y = c.canvas.height - (val / vmax) * (c.canvas.height - 2*pad) - pad;
+  const vmax = Math.max(...series.map(s=> s.arr.at(-1) || 1),1);
+  const pad = 6*devicePixelRatio;
+  function draw(arr, color){
+    c.lineWidth = 2*devicePixelRatio; c.strokeStyle=color; c.beginPath();
+    arr.forEach((val,i)=>{
+      const x = (i/(arr.length-1))*(c.canvas.width-2*pad)+pad;
+      const y = c.canvas.height - (val/vmax)*(c.canvas.height-2*pad) - pad;
       if(i===0) c.moveTo(x,y); else c.lineTo(x,y);
-    });
-    c.stroke();
+    }); c.stroke();
   }
+  series.forEach(s=> draw(s.arr, s.color));
 
-  // Grau = Einzahlungen, Blau = Prognose
-  drawLine(contrib, '#94a3b8');
-  drawLine(value,   '#22d3ee');
-
-  const totalContrib = m * n;
-  const endValue = value.at(-1) || 0;
-  const interest = Math.max(endValue - totalContrib, 0);
-  byId('projText').textContent = `Nach ${y} Jahren: Einzahlung ${euro(totalContrib)} → Prognose ${euro(endValue)} (Ertrag ~ ${euro(interest)}).`;
+  const base = series[0].arr.at(-1)||0;
+  const mine = series[1].arr.at(-1)||0;
+  byId('projText').textContent = `Nach ${y} Jahren: Einzahlung ${euro(base)} · dein Szenario ${euro(mine)} (Zins-Ertrag ~ ${euro(Math.max(mine-base,0))}).`;
+  byId('projLegend').innerHTML = series.map(s=>`<span class="item"><span class="dot" style="background:${s.color}"></span>${s.name}</span>`).join(' ');
 }
 
 /* ===== Init ===== */
 try{ const saved = JSON.parse(localStorage.getItem(LS)||'null'); if(saved) S = {...S, ...saved}; }catch(e){}
 fillDefaults();
-go(1); // Wizard initial auf Schritt 1
+go(1);
 </script>
 </body>
 </html>
