@@ -62,9 +62,7 @@
       <h1>Finanz-TÜV</h1>
       <p class="lead">Geführter Finanz-Check mit klaren Kategorien – Einnahmen, Ausgaben, Schulden, Notgroschen & Ziele. Am Ende erhältst du eine detaillierte Analyse mit Charts & Maßnahmen.</p>
       <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap">
-        <!-- FIX: start at step 1 -->
         <button class="btn" onclick="showPage('wizard'); go(1)">Jetzt starten</button>
-        <button class="btn.ghost" style="display:none"></button>
         <button class="btn ghost" onclick="loadDemo()">Beispiel laden</button>
       </div>
     </div>
@@ -167,7 +165,6 @@
         <button class="btn ghost" onclick="next(3)">← Zurück</button>
         <div style="display:flex; gap:8px">
           <button class="btn ghost" onclick="resetDefaults()">Zurücksetzen</button>
-          <!-- FIX: finish persists and shows results -->
           <button class="btn" onclick="finish()">Analyse anzeigen →</button>
         </div>
       </div>
@@ -193,6 +190,18 @@
         <canvas id="bars" height="180"></canvas>
         <div class="muted" id="nwText" style="margin-top:6px"></div>
       </div>
+    </div>
+
+    <!-- Sparziel-Projektion (interaktiv) -->
+    <div class="panel">
+      <h3 style="margin:0 0 6px">Sparziel-Projektion (monatlich)</h3>
+      <div class="grid2">
+        <div><label>Monatlich sparen (€)</label><input type="number" id="msave" value="300" step="10"></div>
+        <div><label>Zinssatz p.a. (%)</label><input type="number" id="rate" value="5" step="0.1"></div>
+        <div><label>Horizont (Jahre)</label><input type="number" id="years" value="10" step="1"></div>
+      </div>
+      <canvas id="proj" height="180" style="margin-top:8px"></canvas>
+      <div class="muted" id="projText" style="margin-top:6px"></div>
     </div>
 
     <div class="panel">
@@ -231,7 +240,9 @@ let S = {
   debtMonthly:250, debtTotal:5000, emerg:6000, runwayTarget:6,
   // Vermögen & Ziele
   cash:1000, invest:5000, pension:0, realestate:0,
-  retire:2000, goal1:1000, goal2:5000, goal3:0
+  retire:2000, goal1:1000, goal2:5000, goal3:0,
+  // Sparziel-Projektion
+  msave:300, rate:5, years:10
 };
 const LS='finanzTuvSiteV1';
 
@@ -240,6 +251,10 @@ const steps = [1,2,3,4]; // step ids
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   byId(id).classList.add('active');
+  // Wenn Ergebnisse sichtbar werden → erst dann zeichnen (breite>0)
+  if(id === 'results'){
+    requestAnimationFrame(renderResults);
+  }
 }
 function go(n){
   // show wizard step n
@@ -279,7 +294,8 @@ function resetDefaults(){
     groceries:320, dining:120, leisure:120, subscriptions:25, transportVar:60, otherVar:40,
     debtMonthly:250, debtTotal:5000, emerg:6000, runwayTarget:6,
     cash:1000, invest:5000, pension:0, realestate:0,
-    retire:2000, goal1:1000, goal2:5000, goal3:0
+    retire:2000, goal1:1000, goal2:5000, goal3:0,
+    msave:300, rate:5, years:10
   };
   fillDefaults();
 }
@@ -289,13 +305,10 @@ function loadDemo(){ resetDefaults(); showPage('wizard'); go(1); }
 
 /* ===== Finish -> Analyse ===== */
 function finish(){
-  persistFromDOM();           // Eingaben sichern
-  showPage('results');        // Ergebnisseite sichtbar machen
-  requestAnimationFrame(() => {
-    renderResults();          // Jetzt sind clientWidth/Height > 0
-  });
+  persistFromDOM();
+  showPage('results');            // Seite sichtbar machen
+  // renderResults wird in showPage via rAF getriggert
 }
-
 
 /* ===== Analyse/Ergebnis ===== */
 function renderResults(){
@@ -414,6 +427,72 @@ function renderResults(){
   ['goal1','goal2','goal3'].forEach((g,i)=>{ const v=+S[g]||0; if(v>0) plan.push(`Ziel ${i+1}: ${euro(v)} – feste Monatsrate und Zieltermin planen.`); });
   if(plan.length===0) plan.push('Gesamteindruck: sehr solide – weiter beobachten und regelmäßig aktualisieren.');
   byId('plan').innerHTML = plan.map(t=>`<li>${t}</li>`).join('');
+
+  // --- Interaktive Sparziel-Projektion initialisieren/aktualisieren ---
+  ['msave','rate','years'].forEach(id=>{
+    const el = byId(id);
+    if(!el) return;
+    // Defaults aus dem State in die Felder schreiben (falls nötig)
+    if(id==='msave') el.value = S.msave;
+    if(id==='rate')  el.value = S.rate;
+    if(id==='years') el.value = S.years;
+    if(!el._bound){
+      el.addEventListener('input', renderProjection);
+      el._bound = true;
+    }
+  });
+  requestAnimationFrame(renderProjection);
+}
+
+/* ===== Sparziel-Projektion ===== */
+function renderProjection(){
+  const m = Math.max(+byId('msave')?.value || +S.msave || 0, 0);     // Monatsrate
+  const rPct = +byId('rate')?.value || +S.rate || 0;                  // Zinssatz in %
+  const y = Math.max(+byId('years')?.value || +S.years || 1, 1);      // Jahre ≥ 1
+
+  S.msave = m; S.rate = rPct; S.years = y;
+  localStorage.setItem(LS, JSON.stringify(S));
+
+  const r = rPct / 100;
+  const rm = Math.pow(1 + r, 1/12) - 1;
+  const n = Math.round(y * 12);
+
+  let v = 0;
+  const contrib = [], value = [];
+  for (let i = 1; i <= n; i++){
+    v = v * (1 + rm) + m; // Monatszins + Einzahlung
+    value.push(v);
+    contrib.push(m * i);  // nur Einzahlungen
+  }
+
+  const c = byId('proj').getContext('2d');
+  c.canvas.width  = c.canvas.clientWidth  * devicePixelRatio;
+  c.canvas.height = c.canvas.clientHeight * devicePixelRatio;
+  c.clearRect(0,0,c.canvas.width,c.canvas.height);
+
+  const vmax = Math.max(value.at(-1) || 1, contrib.at(-1) || 1);
+  const pad = 6 * devicePixelRatio;
+
+  function drawLine(arr, color){
+    c.lineWidth = 2 * devicePixelRatio;
+    c.strokeStyle = color;
+    c.beginPath();
+    arr.forEach((val, i)=>{
+      const x = (i/(arr.length-1)) * (c.canvas.width - 2*pad) + pad;
+      const y = c.canvas.height - (val / vmax) * (c.canvas.height - 2*pad) - pad;
+      if(i===0) c.moveTo(x,y); else c.lineTo(x,y);
+    });
+    c.stroke();
+  }
+
+  // Grau = Einzahlungen, Blau = Prognose
+  drawLine(contrib, '#94a3b8');
+  drawLine(value,   '#22d3ee');
+
+  const totalContrib = m * n;
+  const endValue = value.at(-1) || 0;
+  const interest = Math.max(endValue - totalContrib, 0);
+  byId('projText').textContent = `Nach ${y} Jahren: Einzahlung ${euro(totalContrib)} → Prognose ${euro(endValue)} (Ertrag ~ ${euro(interest)}).`;
 }
 
 /* ===== Init ===== */
@@ -423,4 +502,3 @@ go(1); // Wizard initial auf Schritt 1
 </script>
 </body>
 </html>
-
