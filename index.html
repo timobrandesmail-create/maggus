@@ -62,7 +62,9 @@
       <h1>Finanz-TÜV</h1>
       <p class="lead">Geführter Finanz-Check mit klaren Kategorien – Einnahmen, Ausgaben, Schulden, Notgroschen & Ziele. Am Ende erhältst du eine detaillierte Analyse mit Charts & Maßnahmen.</p>
       <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap">
-        <button class="btn" onclick="showPage('wizard'); go(0)">Jetzt starten</button>
+        <!-- FIX: start at step 1 -->
+        <button class="btn" onclick="showPage('wizard'); go(1)">Jetzt starten</button>
+        <button class="btn.ghost" style="display:none"></button>
         <button class="btn ghost" onclick="loadDemo()">Beispiel laden</button>
       </div>
     </div>
@@ -91,7 +93,7 @@
       </div>
     </div>
 
-    <!-- Schritt 2: Ausgaben (Fix & Variabel) -->
+    <!-- Schritt 2: Ausgaben -->
     <div class="panel step" id="step2" style="display:none">
       <h2 style="margin:0 0 8px">Ausgaben</h2>
 
@@ -165,6 +167,7 @@
         <button class="btn ghost" onclick="next(3)">← Zurück</button>
         <div style="display:flex; gap:8px">
           <button class="btn ghost" onclick="resetDefaults()">Zurücksetzen</button>
+          <!-- FIX: finish persists and shows results -->
           <button class="btn" onclick="finish()">Analyse anzeigen →</button>
         </div>
       </div>
@@ -243,9 +246,9 @@ function go(n){
   steps.forEach(s=> byId('step'+s).style.display = (s===n)?'block':'none');
   byId('stepNum').textContent = n;
   byId('stepTotal').textContent = steps.length;
-  const pct = Math.round((n-1)/(steps.length)*100);
-  byId('bar').style.width = pct+'%';
-  byId('pct').textContent = pct+'%';
+  const p = Math.round((n-1)/(steps.length)*100);
+  byId('bar').style.width = p+'%';
+  byId('pct').textContent = p+'%';
 }
 function next(n){
   persistFromDOM(); // update state before moving
@@ -286,6 +289,7 @@ function loadDemo(){ resetDefaults(); showPage('wizard'); go(1); }
 
 /* ===== Finish -> Analyse ===== */
 function finish(){
+  // FIX: Eingaben sichern, dann berechnen, dann anzeigen
   persistFromDOM();
   renderResults();
   showPage('results');
@@ -382,7 +386,7 @@ function renderResults(){
   });
   byId('nwText').textContent = `Nettovermögen: ${euro(net)} (Vermögen ${euro(assets)} / Schulden ${euro(debts)}).`;
 
-  // Breakdown-Liste (Top-Kategorien & Anteile)
+  // Breakdown-Liste
   const cats = [
     ['Fixkosten', fixed],
     ['Variabel', variable],
@@ -413,7 +417,7 @@ function renderResults(){
 /* ===== Init ===== */
 try{ const saved = JSON.parse(localStorage.getItem(LS)||'null'); if(saved) S = {...S, ...saved}; }catch(e){}
 fillDefaults();
-go(1);
+go(1); // Wizard initial auf Schritt 1
 </script>
 </body>
 </html>
