@@ -289,11 +289,13 @@ function loadDemo(){ resetDefaults(); showPage('wizard'); go(1); }
 
 /* ===== Finish -> Analyse ===== */
 function finish(){
-  // FIX: Eingaben sichern, dann berechnen, dann anzeigen
-  persistFromDOM();
-  renderResults();
-  showPage('results');
+  persistFromDOM();           // Eingaben sichern
+  showPage('results');        // Ergebnisseite sichtbar machen
+  requestAnimationFrame(() => {
+    renderResults();          // Jetzt sind clientWidth/Height > 0
+  });
 }
+
 
 /* ===== Analyse/Ergebnis ===== */
 function renderResults(){
@@ -421,3 +423,4 @@ go(1); // Wizard initial auf Schritt 1
 </script>
 </body>
 </html>
+
