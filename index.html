@@ -2,510 +2,1065 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0ea5e9">
-<title>Finanz-TÜV</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SARI Governance Tool – Prototype v1.0</title>
 <style>
   :root{
-    --bg:#0b1220; --panel:rgba(255,255,255,.06); --ink:#e5e7eb; --muted:#94a3b8; --ring:rgba(255,255,255,.12);
-    --brand:#22d3ee; --good:#10b981; --warn:#f59e0b; --bad:#ef4444; --r:16px;
-  }
-  @media (prefers-color-scheme: light){
-    :root{ --bg:#f8fafc; --panel:#ffffff; --ink:#0f172a; --muted:#64748b; --ring:#e2e8f0 }
+    --bg:#0c0f14;--panel:#151a22;--ink:#e6ebf1;--muted:#a7b0be;--brand:#5ee3b2;
+    --warn:#ffcc66;--danger:#ff6b6b;--ok:#63e6be;--link:#7ab0ff;--grid:#2a3140;
+    --accent:#c8e6ff;--chip:#202734;
   }
   *{box-sizing:border-box}
-  body{margin:0; font:16px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto; background:var(--bg); color:var(--ink);}
-  a,button{cursor:pointer}
-  .wrap{max-width:980px; margin:0 auto; padding:18px 16px calc(env(safe-area-inset-bottom)+18px)}
-  .hero{display:grid; place-items:center; min-height:55vh; text-align:center}
-  .logo{width:52px; height:52px; border-radius:14px; background:conic-gradient(from 200deg,#67e8f9,#a78bfa,#67e8f9); margin:0 auto 10px}
-  h1{margin:6px 0 4px; font-size:28px}
-  p.lead{color:var(--muted); max-width:50ch; margin:0 auto 16px}
-  .btn{height:48px; padding:0 18px; border-radius:12px; border:1px solid var(--ring); background:linear-gradient(135deg,#06b6d4,#22d3ee); color:#001019; font-weight:700}
-  .btn.ghost{background:rgba(255,255,255,.06); color:var(--ink)}
-  .panel{background:var(--panel); border:1px solid var(--ring); border-radius:var(--r); padding:14px}
-  .grid{display:grid; gap:12px}
-  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-  @media(min-width:860px){ .grid2{grid-template-columns:repeat(2,1fr)} }
-  label{font-size:12px; color:var(--muted); display:block; margin:0 0 6px 2px}
-  input[type=number]{width:100%; height:48px; border-radius:12px; border:1px solid var(--ring); background:transparent; color:var(--ink); padding:0 12px; font-size:16px}
-  /* Pages */
-  .page{display:none} .page.active{display:block}
-  /* Wizard */
-  .wizardHead{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px}
-  .progress{position:relative; height:10px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden}
-  .bar{position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg,#06b6d4,#22d3ee); transition:width .25s}
-  .pct{font-size:12px; color:var(--muted)}
-  .cat{border:1px dashed var(--ring); border-radius:14px; padding:10px}
-  .cat h3{margin:0 0 8px; font-size:15px}
-  .nav{display:flex; justify-content:space-between; gap:8px; margin-top:10px}
-  /* Results */
-  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px}
-  .kpi{border:1px solid var(--ring); border-radius:12px; padding:12px; background:rgba(255,255,255,.05)}
-  .lab{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em}
-  .val{font-weight:800; font-size:20px}
-  .legend{display:flex; flex-wrap:wrap; gap:10px; margin-top:6px}
-  .dot{width:10px; height:10px; border-radius:50%}
-  canvas{max-width:100%}
-  .cols{display:grid; gap:12px}
-  @media(min-width:860px){ .cols{grid-template-columns: 2fr 1fr} }
+  html,body{height:100%}
+  body{margin:0;background:linear-gradient(180deg,#0a0d12,#0f141c);color:var(--ink);
+       font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+  a{color:var(--link);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+  aside{background:var(--panel);border-right:1px solid var(--grid);padding:16px;position:sticky;top:0;height:100vh;overflow:auto}
+  main{padding:16px 24px 120px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--brand),#44b6ff)}
+  h1{font-size:18px;margin:0}
+  .sub{color:var(--muted);font-size:12px}
+  .navsec{margin-top:16px}
+  .navsec h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+  .nav button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;margin:4px 0;
+    background:transparent;border:1px solid transparent;color:var(--ink);border-radius:10px;cursor:pointer}
+  .nav button.active{background:var(--chip);border-color:var(--grid)}
+  .chip{background:var(--chip);padding:3px 8px;border-radius:999px;font-size:12px;color:var(--muted);border:1px solid var(--grid)}
+  .kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+  .card{background:var(--panel);border:1px solid var(--grid);border-radius:14px;padding:14px}
+  .kpi .card h4{margin:0 0 8px 0;font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+  .big{font-size:22px;font-weight:700}
+  .danger{color:var(--danger)} .warn{color:var(--warn)} .ok{color:var(--ok)}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 16px}
+  .btn{background:#1d2431;border:1px solid var(--grid);color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
+  .btn.primary{background:linear-gradient(135deg,#44b6ff,var(--brand));border:none;color:#00140b;font-weight:700}
+  .btn.ghost{background:transparent}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  label{display:block;margin:8px 0 4px;color:var(--muted);font-size:12px}
+  input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--grid);background:#0f141c;color:var(--ink)}
+  textarea{min-height:110px;resize:vertical}
+  table{width:100%;border-collapse:separate;border-spacing:0 8px}
+  th,td{text-align:left;padding:8px 10px;background:var(--panel);border:1px solid var(--grid)}
+  th{font-size:12px;color:var(--muted)}
+  tr td:first-child, tr th:first-child{border-top-left-radius:10px;border-bottom-left-radius:10px}
+  tr td:last-child, tr th:last-child{border-top-right-radius:10px;border-bottom-right-radius:10px}
+  .hint{background:#10202a;border:1px solid #1e3b46;padding:12px;border-radius:12px;color:#bfe9ff}
   .muted{color:var(--muted)}
-  .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; border:1px solid var(--ring); background:rgba(255,255,255,.06); font-weight:700}
-  .grade{display:inline-block; min-width:28px; text-align:center; border-radius:8px; padding:2px 6px; font-weight:800}
-  .gA{background:#10b9811a; color:#10b981; border:1px solid #10b98166}
-  .gB{background:#22d3ee1a; color:#22d3ee; border:1px solid #22d3ee66}
-  .gC{background:#f59e0b1a; color:#f59e0b; border:1px solid #f59e0b66}
-  .gD{background:#ef44441a; color:#ef4444; border:1px solid #ef444466}
+  .inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .tag{font-size:12px;background:var(--chip);padding:4px 8px;border:1px solid var(--grid);border-radius:999px;color:var(--muted)}
+  .status{display:inline-flex;align-items:center;gap:8px}
+  .status i{width:10px;height:10px;border-radius:50%;background:var(--warn)}
+  .status.ok i{background:var(--ok)} .status.bad i{background:var(--danger)}
+  .pill{padding:2px 8px;border-radius:999px;border:1px solid var(--grid);font-size:12px;background:#121722}
+  .section h2{margin:8px 0 6px}
+  .guard{border-left:4px solid var(--brand);padding:10px 12px;background:#0f1921;border-radius:10px;margin:10px 0}
+  .footbar{position:fixed;bottom:0;left:280px;right:0;background:rgba(16,22,30,.9);backdrop-filter:blur(8px);border-top:1px solid var(--grid);
+     padding:10px 16px;display:flex;justify-content:space-between;align-items:center}
+  .progress{height:10px;background:#111722;border:1px solid var(--grid);border-radius:999px;overflow:hidden}
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,#44b6ff,var(--brand));width:0%}
+  .rca-board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .rca-col{background:var(--panel);border:1px solid var(--grid);border-radius:12px;padding:10px}
+  .list{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+  .list .row{display:flex;gap:6px}
+  .tiny{font-size:12px}
+  .print-only{display:none}
+  @media print{
+    aside,.footbar,.toolbar,.kpi{display:none}
+    .print-only{display:block}
+    body{background:#fff;color:#000}
+    main{padding:0}
+    .card,.rca-col,.guard{border:1px solid #ddd;background:#fff}
+    a{text-decoration:none;color:#000}
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-
-  <!-- Landing -->
-  <section id="landing" class="page active">
-    <div class="hero">
+<div class="app">
+  <aside>
+    <header>
       <div class="logo" aria-hidden="true"></div>
-      <h1>Finanz-TÜV</h1>
-      <p class="lead">Geführter Finanz-Check mit klaren Kategorien – reine **Bewertung der Situation**, keine Produktempfehlungen. Auf Wunsch „What-if“-Szenarien & Benchmark-Vergleiche.</p>
-      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap">
-        <button class="btn" onclick="showPage('wizard'); go(1)">Jetzt starten</button>
-        <button class="btn ghost" onclick="loadDemo()">Beispiel laden</button>
-      </div>
-      <div style="margin-top:14px"><span class="badge">🔧 TÜV-Siegel (Beta) · an DIN 77230 orientiert</span></div>
-    </div>
-  </section>
+      <div><h1>SARI Governance</h1><div class="sub">Prototype v1.0</div></div>
+    </header>
 
-  <!-- Wizard -->
-  <section id="wizard" class="page">
-    <div class="wizardHead">
-      <div style="flex:1">
-        <div class="progress"><div class="bar" id="bar"></div></div>
-        <div class="pct" id="pct">0%</div>
+    <div class="nav">
+      <div class="navsec">
+        <h3>Allgemein</h3>
+        <button data-view="dashboard" class="active">🏠 Dashboard</button>
+        <button data-view="meta">🗂️ SARI Stammdaten</button>
+        <button data-view="governance">🏛️ Governance</button>
+        <button data-view="idcard">🧾 ID-Card</button>
+        <button data-view="maturity">📈 Maturity-Checklist</button>
       </div>
-      <div class="muted">Schritt <span id="stepNum">1</span>/<span id="stepTotal">4</span></div>
-    </div>
-
-    <!-- Schritt 1: Einnahmen -->
-    <div class="panel step" id="step1">
-      <h2 style="margin:0 0 8px">Einnahmen</h2>
-      <div class="grid2">
-        <div><label>Netto-Einkommen (€/Monat)</label><input type="number" id="income" value="3200" step="50"></div>
-        <div><label>Sonstige Einnahmen (€/Monat)</label><input type="number" id="otherInc" value="200" step="50"></div>
+      <div class="navsec">
+        <h3>9S Schritte</h3>
+        <button data-view="s0">S0 • Containment</button>
+        <button data-view="s1">S1 • Team Charter</button>
+        <button data-view="s2">S2 • Evidence Hub</button>
+        <button data-view="s3">S3 • Validate Containment</button>
+        <button data-view="s4">S4 • RCA Workspace</button>
+        <button data-view="s5">S5 • Corrective Actions</button>
+        <button data-view="s6">S6 • Implement & Effectiveness</button>
+        <button data-view="s7">S7 • Standardize & Prevent</button>
+        <button data-view="s8">S8 • Close & Recognize</button>
       </div>
-      <div class="nav">
-        <button class="btn ghost" onclick="showPage('landing')">← Abbrechen</button>
-        <button class="btn" onclick="next(2)">Weiter</button>
+      <div class="navsec">
+        <h3>Utility</h3>
+        <button id="btnNewSari">➕ Neues SARI</button>
+        <button id="btnExport">⬇️ Export JSON</button>
+        <button id="btnImport">⬆️ Import JSON</button>
+        <input id="importFile" type="file" accept="application/json" hidden>
+        <button id="btnGridImport">🧩 Import Maturity Grid (CSV)</button>
+        <input id="gridFile" type="file" accept=".csv,text/csv" hidden>
       </div>
-    </div>
-
-    <!-- Schritt 2: Ausgaben -->
-    <div class="panel step" id="step2" style="display:none">
-      <h2 style="margin:0 0 8px">Ausgaben</h2>
-
-      <div class="cat">
-        <h3>Fixkosten</h3>
-        <div class="grid2">
-          <div><label>Wohnen/Miete</label><input type="number" id="rent" value="950" step="50"></div>
-          <div><label>Nebenkosten/Energie</label><input type="number" id="utilities" value="200" step="20"></div>
-          <div><label>Versicherungen (Prämien)</label><input type="number" id="insPrem" value="60" step="10"></div>
-          <div><label>Telefon/Internet</label><input type="number" id="telecom" value="40" step="5"></div>
-          <div><label>ÖPNV/Auto (fix)</label><input type="number" id="transportFix" value="120" step="10"></div>
-          <div><label>Sonstige Fixkosten</label><input type="number" id="otherFix" value="50" step="10"></div>
-        </div>
-      </div>
-
-      <div class="cat" style="margin-top:10px">
-        <h3>Variabel / Lifestyle</h3>
-        <div class="grid2">
-          <div><label>Lebensmittel</label><input type="number" id="groceries" value="320" step="20"></div>
-          <div><label>Restaurant/To-Go</label><input type="number" id="dining" value="120" step="10"></div>
-          <div><label>Freizeit/Shopping</label><input type="number" id="leisure" value="120" step="10"></div>
-          <div><label>Abos/Streaming</label><input type="number" id="subscriptions" value="25" step="5"></div>
-          <div><label>Mobilität (variabel)</label><input type="number" id="transportVar" value="60" step="10"></div>
-          <div><label>Sonstiges variabel</label><input type="number" id="otherVar" value="40" step="10"></div>
-        </div>
-      </div>
-
-      <div class="nav">
-        <button class="btn ghost" onclick="next(1)">← Zurück</button>
-        <button class="btn" onclick="next(3)">Weiter</button>
-      </div>
-    </div>
-
-    <!-- Schritt 3: Schulden & Notgroschen -->
-    <div class="panel step" id="step3" style="display:none">
-      <h2 style="margin:0 0 8px">Schulden & Notgroschen</h2>
-      <div class="grid2">
-        <div><label>Kreditrate(n) mtl.</label><input type="number" id="debtMonthly" value="250" step="10"></div>
-        <div><label>Schulden gesamt (€)</label><input type="number" id="debtTotal" value="5000" step="100"></div>
-        <div><label>Notgroschen (Betrag €)</label><input type="number" id="emerg" value="6000" step="100"></div>
-        <div><label>Ziel-Runway (Monate)</label><input type="number" id="runwayTarget" value="6" step="1"></div>
-      </div>
-      <div class="nav">
-        <button class="btn ghost" onclick="next(2)">← Zurück</button>
-        <button class="btn" onclick="next(4)">Weiter</button>
-      </div>
-    </div>
-
-    <!-- Schritt 4: Vermögen & Ziele -->
-    <div class="panel step" id="step4" style="display:none">
-      <h2 style="margin:0 0 8px">Vermögen & Ziele</h2>
-      <div class="cat">
-        <h3>Vermögen</h3>
-        <div class="grid2">
-          <div><label>Cash (außer Notgroschen)</label><input type="number" id="cash" value="1000" step="100"></div>
-          <div><label>Depot/ETF</label><input type="number" id="invest" value="5000" step="200"></div>
-          <div><label>Renten/bAV (Schätzwert)</label><input type="number" id="pension" value="0" step="500"></div>
-          <div><label>Immobilien-EK</label><input type="number" id="realestate" value="0" step="500"></div>
-        </div>
-      </div>
-      <div class="cat" style="margin-top:10px">
-        <h3>Ziele</h3>
-        <div class="grid2">
-          <div><label>Wunsch-Rente (Netto € / Monat)</label><input type="number" id="retire" value="2000" step="50"></div>
-          <div><label>Ziel 1 (Betrag €)</label><input type="number" id="goal1" value="1000" step="50"></div>
-          <div><label>Ziel 2 (Betrag €)</label><input type="number" id="goal2" value="5000" step="100"></div>
-          <div><label>Ziel 3 (Betrag €)</label><input type="number" id="goal3" value="0" step="100"></div>
-        </div>
-      </div>
-      <div class="nav">
-        <button class="btn ghost" onclick="next(3)">← Zurück</button>
-        <div style="display:flex; gap:8px">
-          <button class="btn ghost" onclick="resetDefaults()">Zurücksetzen</button>
-          <button class="btn" onclick="finish()">Analyse anzeigen →</button>
+      <div class="navsec">
+        <h3>Info</h3>
+        <div class="hint tiny">
+          Demo-Maturity-Grid (S0–S3) ist vorbefüllt. <br>Vollständiges CSV kann über „Grid Import“ geladen werden.
         </div>
       </div>
     </div>
-  </section>
+  </aside>
 
-  <!-- Ergebnisse -->
-  <section id="results" class="page">
-    <h2 style="margin:0 0 8px">Ergebnisse & Analyse</h2>
-    <div class="kpis" id="kpis"></div>
-
-    <div class="panel">
-      <h3 style="margin:0 0 6px">Bewertung (situationsbezogen)</h3>
-      <ul id="rating" style="margin:0; padding-left:18px"></ul>
-      <div class="muted" style="margin-top:6px">Hinweis: rein indikativ, keine Produktempfehlung. „What-if“ siehe unten.</div>
-    </div>
-
-    <div class="cols" style="margin-top:10px">
-      <div class="panel">
-        <h3 style="margin:0 0 6px">Ausgaben-Donut & Projektion</h3>
-        <canvas id="pie" height="220"></canvas>
-        <div class="legend" id="legend"></div>
-        <div class="muted" id="sumTxt" style="margin-top:6px"></div>
-        <canvas id="spark" height="64" style="margin-top:8px"></canvas>
-        <div class="muted" style="font-size:12px">12-Monats-Projektion: kumuliertes Sparen bei konstantem Überschuss.</div>
+  <main>
+    <!-- KPI DASHBOARD -->
+    <section data-page="dashboard" class="section">
+      <div class="kpi">
+        <div class="card"><h4>Overdue Aktionen</h4><div id="kpiOverdue" class="big">0</div></div>
+        <div class="card"><h4>RPN</h4><div class="big"><span id="kpiRpn">0</span> <span class="pill" id="kpiLevel">L–</span></div></div>
+        <div class="card"><h4>Fortschritt 9S</h4><div class="progress"><i id="kpiProgress" style="width:0%"></i></div><div class="tiny muted" id="kpiProgressTxt">0%</div></div>
+        <div class="card"><h4>Status</h4><div class="inline">
+          <span class="status" id="stContain"><i></i>Containment</span>
+          <span class="status" id="stRca"><i></i>RCA</span>
+          <span class="status" id="stPca"><i></i>PCA</span>
+          <span class="status" id="stClose"><i></i>Close</span>
+        </div></div>
       </div>
-      <div class="panel">
-        <h3 style="margin:0 0 6px">Vermögen vs. Schulden</h3>
-        <canvas id="bars" height="180"></canvas>
-        <div class="muted" id="nwText" style="margin-top:6px"></div>
+
+      <div class="card">
+        <h2>SARI Snapshot</h2>
+        <div class="grid">
+          <div>
+            <label>SARI Titel</label><input id="metaTitle" placeholder="z.B. GEN-004 – Incorrect Assembly of …">
+          </div>
+          <div class="grid">
+            <div>
+              <label>SARI Level</label>
+              <select id="metaLevel">
+                <option value="L1">L1 – In-Service + possible Unsafe condition</option>
+                <option value="L2">L2 – In-Service, keine unsafe condition</option>
+                <option value="L3">L3 – In-Production enthalten</option>
+              </select>
+            </div>
+            <div>
+              <label>ATA (optional)</label><input id="metaAta" placeholder="z.B. ATA 27">
+            </div>
+          </div>
+
+          <div class="grid">
+            <div>
+              <label>Severity (S)</label><input id="sevS" type="number" min="1" max="10" placeholder="1–10">
+            </div>
+            <div>
+              <label>Occurrence (O)</label><input id="sevO" type="number" min="1" max="10" placeholder="1–10">
+            </div>
+            <div>
+              <label>Detection (D)</label><input id="sevD" type="number" min="1" max="10" placeholder="1–10">
+            </div>
+          </div>
+          <div><span class="muted tiny">RPN = S × O × D • „Top Irritants“ (RPN ≥ 300) → S7 verpflichtend</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- META -->
+    <section data-page="meta" class="section" hidden>
+      <div class="card">
+        <h2>Stammdaten & Rollen</h2>
+        <div class="grid">
+          <div><label>SIM (Safety Item Manager)</label><input id="roleSim" placeholder="Name SIM"></div>
+          <div><label>Sponsor</label><input id="roleSponsor"></div>
+          <div><label>Solving Leader</label><input id="roleLeader"></div>
+          <div><label>Problem Owner</label><input id="roleOwner"></div>
+          <div><label>Operations Vertreter</label><input id="roleOps"></div>
+          <div><label>PPM (Coach)</label><input id="rolePpm"></div>
+        </div>
+        <div class="grid">
+          <div><label>First Event (Datum)</label><input id="dateFirst" type="date"></div>
+          <div><label>Kundeninfo gesendet am</label><input id="dateCustomer" type="date"></div>
+          <div><label>Line Stop durchgeführt</label><select id="lineStop"><option>Nein</option><option>Ja</option></select></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GOVERNANCE -->
+    <section data-page="governance" class="section" hidden>
+      <div class="card">
+        <h2>Governance & Panels</h2>
+        <div class="grid">
+          <div>
+            <label>ICB Status</label>
+            <select id="govIcb">
+              <option value="">—</option>
+              <option>Wartet auf Allokation</option>
+              <option>SIM nominiert</option>
+              <option>Abgeschlossen</option>
+            </select>
+          </div>
+          <div>
+            <label>PPP (L2/L3)</label>
+            <select id="govPpp">
+              <option value="">—</option>
+              <option>In Vorbereitung</option>
+              <option>Ready for PPM Review</option>
+              <option>Scheduled for PPP</option>
+              <option>PPP validiert</option>
+            </select>
+          </div>
+          <div>
+            <label>PP (L1)</label>
+            <select id="govPp">
+              <option value="">—</option>
+              <option>In Vorbereitung</option>
+              <option>Ready for PPM Review</option>
+              <option>Scheduled for PP</option>
+              <option>PP validiert</option>
+            </select>
+          </div>
+          <div>
+            <label>POARM (EASA, L1)</label>
+            <select id="govPoarm">
+              <option value="">—</option>
+              <option>nicht anwendbar</option>
+              <option>vorbereitet</option>
+              <option>durchgeführt</option>
+            </select>
+          </div>
+        </div>
+
+        <h3>Early Closure (nur L2/L3)</h3>
+        <div class="guard">
+          <div class="grid">
+            <div><label>Risikoanalyse – Wiederauftreten (Likelihood)</label><input id="rcRiskL" type="text" placeholder="z.B. gering / begründet…"></div>
+            <div><label>Risikoanalyse – Auswirkung (Severity)</label><input id="rcRiskS" type="text" placeholder="z.B. niedrig / begründet…"></div>
+          </div>
+          <label>Begründung Early Closure (für PPP)</label>
+          <textarea id="rcJust">Basierend auf implementierten PCA und Wirksamkeitsnachweis wird die Untersuchung vor S7 geschlossen. Risiko ist akzeptabel, da …</textarea>
+          <div class="inline">
+            <button class="btn" id="btnMarkEarly">🔏 Early Closure markieren</button>
+            <span class="tag" id="tagEarly" hidden>EARLY CLOSURE DRAFT</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MATURITY CHECKLIST -->
+    <section data-page="maturity" class="section" hidden>
+      <div class="card">
+        <h2>Maturity-Checklist (FM2201494)</h2>
+        <div id="maturityList" class="list"></div>
+      </div>
+    </section>
+
+    <!-- ID CARD -->
+    <section data-page="idcard" class="section" hidden>
+      <div class="card">
+        <h2>ID-Card (FM2201652)</h2>
+        <div id="idCardContainer"></div>
+        <div class="toolbar">
+          <button class="btn" onclick="window.print()">🖨️ Drucken / PDF</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- S0 -->
+    <section data-page="s0" class="section" hidden>
+      <div class="card">
+        <h2>S0 – Containment Cockpit</h2>
+        <div class="guard" id="gridS0"></div>
+        <div class="grid">
+          <div>
+            <label>Nachweis Kundeninformation (Datum)</label><input id="s0CustomerDate" type="date">
+          </div>
+          <div>
+            <label>Containment-Aktionsplan (Upload)</label><input id="s0PlanFile" type="file">
+          </div>
+          <div>
+            <label>Line Stop durchgeführt</label>
+            <select id="s0LineStop"><option>Nein</option><option>Ja</option></select>
+          </div>
+          <div>
+            <label>Bestandsprüfung – Nachweis</label><textarea id="s0StockProof" placeholder="Link/Notiz; Upload unten optional"></textarea>
+          </div>
+          <div>
+            <label>Bestandsprüfung (Upload)</label><input id="s0StockFile" type="file">
+          </div>
+        </div>
+
+        <div class="hint" id="s0Urgency">
+          ⏱️ 1-Tages-Frist Kundeninfo: <b id="s0DueTxt">–</b>
+        </div>
+      </div>
+    </section>
+
+    <!-- S1 -->
+    <section data-page="s1" class="section" hidden>
+      <div class="card">
+        <h2>S1 – Team Charter</h2>
+        <div class="guard" id="gridS1"></div>
+        <div class="grid">
+          <div><label>Leader</label><input id="s1Leader"></div>
+          <div><label>Sponsor</label><input id="s1Sponsor"></div>
+          <div><label>Problem Owner</label><input id="s1Owner"></div>
+          <div><label>Operations</label><input id="s1Ops"></div>
+          <div><label>Weitere MFT-Member</label><input id="s1Mft"></div>
+          <div><label>Kick-off Protokoll (Upload)</label><input id="s1MoM" type="file"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- S2 -->
+    <section data-page="s2" class="section" hidden>
+      <div class="card">
+        <h2>S2 – Evidence Hub</h2>
+        <div class="guard" id="gridS2"></div>
+        <div class="grid">
+          <div>
+            <label>Issue Description (faktenbasiert)</label>
+            <textarea id="s2Issue" placeholder="1 Objekt, 1 Defekt; Fakten & Zahlen…"></textarea>
+          </div>
+          <div>
+            <label>Supply Chain Breakdown</label>
+            <textarea id="s2Supply" placeholder="Tier 2 → Tier 1 → FAL → …"></textarea>
+          </div>
+        </div>
+        <div class="grid">
+          <div>
+            <label>5W2H</label>
+            <textarea id="s2_5w2h" placeholder="What, Where, When, Who, Why, How, How many/cost…"></textarea>
+          </div>
+          <div>
+            <label>IS / IS NOT (bei komplexen Fällen)</label>
+            <textarea id="s2IsIsNot" placeholder="IS: … / IS NOT: …"></textarea>
+          </div>
+        </div>
+        <div class="grid">
+          <div>
+            <label>Foto/Video (Upload)</label>
+            <input id="s2Media" type="file" accept="image/*,video/*" multiple>
+          </div>
+          <div>
+            <label>M1750 – KI-Vorschlag (GEN)</label>
+            <div id="s2M1750" class="hint tiny">Ergebnis erscheint nach Eingabe/Änderung der Issue Description.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- S3 -->
+    <section data-page="s3" class="section" hidden>
+      <div class="card">
+        <h2>S3 – Validate Containment</h2>
+        <div class="guard" id="gridS3"></div>
+        <div class="grid">
+          <div>
+            <label>Validierungsbericht (Upload)</label><input id="s3ValReport" type="file">
+          </div>
+          <div>
+            <label>Traceability-Bericht (TOAC)</label><input id="s3Trace" type="file">
+          </div>
+          <div>
+            <label>Trigger-Point beschrieben?</label>
+            <select id="s3Trigger"><option>Nein</option><option>Ja</option></select>
+          </div>
+          <div>
+            <label>Curative Actions umgesetzt?</label>
+            <select id="s3Curative"><option>Nein</option><option>Ja</option></select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- S4 -->
+    <section data-page="s4" class="section" hidden>
+      <div class="card">
+        <h2>S4 – Root Cause Analysis Workspace</h2>
+        <div class="guard">Trennung der Ursachenebenen ist verpflichtend (Occurrence, Non-Detection, Systemic). Ishikawa ist empfohlen/verpflichtend (Levelabhängig).</div>
+
+        <div class="rca-board">
+          <div class="rca-col">
+            <b>Occurrence</b>
+            <div class="list" id="ishikawa-occ"></div>
+            <div class="inline">
+              <input id="occInput" placeholder="Ursache hinzufügen …">
+              <button class="btn" id="addOcc">➕</button>
+            </div>
+            <label>Finale RC1</label><input id="rc1">
+          </div>
+          <div class="rca-col">
+            <b>Non-Detection</b>
+            <div class="list" id="ishikawa-non"></div>
+            <div class="inline">
+              <input id="nonInput" placeholder="Ursache hinzufügen …">
+              <button class="btn" id="addNon">➕</button>
+            </div>
+            <label>Finale RC2</label><input id="rc2">
+          </div>
+          <div class="rca-col">
+            <b>Systemic</b>
+            <div class="list" id="ishikawa-sys"></div>
+            <div class="inline">
+              <input id="sysInput" placeholder="Ursache hinzufügen …">
+              <button class="btn" id="addSys">➕</button>
+            </div>
+            <label>Finale RC3</label><input id="rc3">
+          </div>
+        </div>
+
+        <h3>5-Whys Baum</h3>
+        <div class="list" id="whys"></div>
+        <div class="inline">
+          <input id="whyInput" placeholder="Warum …? (Enter fügt hinzu)">
+          <button class="btn" id="addWhy">➕ Warum</button>
+        </div>
+
+        <label>Nachweise (Uploads, optional)</label>
+        <input id="s4Proof" type="file" multiple>
+      </div>
+    </section>
+
+    <!-- S5 -->
+    <section data-page="s5" class="section" hidden>
+      <div class="card">
+        <h2>S5 – Define Corrective Actions</h2>
+        <div class="guard">Jede Maßnahme muss logisch einer Ursache (RC1/RC2/RC3) zugeordnet sein. Effektivitätskriterium definieren.</div>
+        <table>
+          <thead><tr><th>Maßnahme</th><th>Owner</th><th>Fällig</th><th>RC Link</th><th>Erfolgsmetrik</th><th>Status</th><th></th></tr></thead>
+          <tbody id="pcaRows"></tbody>
+        </table>
+        <div class="inline">
+          <button class="btn" id="addPca">➕ Maßnahme</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- S6 -->
+    <section data-page="s6" class="section" hidden>
+      <div class="card">
+        <h2>S6 – Implement & Check Effectiveness</h2>
+        <div class="guard">100% der geplanten Maßnahmen umgesetzt; Wirksamkeit statistisch belegt (SPC/Audit). Containment erst nach Nachweis beenden.</div>
+        <div id="effRows" class="list"></div>
+      </div>
+    </section>
+
+    <!-- S7 -->
+    <section data-page="s7" class="section" hidden>
+      <div class="card">
+        <h2>S7 – Standardize & Prevent</h2>
+        <div class="guard">Look-Across, SOP/FMEA aktualisiert, Lieferkette berücksichtigt. Präventive Maßnahmen planen & überwachen.</div>
+        <div class="grid">
+          <div><label>Look-Across Bericht (Upload)</label><input id="s7Look" type="file"></div>
+          <div><label>Aktualisierte SOP/Prozessdoks (Upload)</label><input id="s7Sop" type="file" multiple></div>
+          <div><label>Aktualisierte FMEA (Upload)</label><input id="s7Fmea" type="file"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- S8 -->
+    <section data-page="s8" class="section" hidden>
+      <div class="card">
+        <h2>S8 – Close & Recognize</h2>
+        <div class="guard">Checkliste ausfüllen; Abschlusskommunikation an Kunden; Lessons Learned integriert. Effektivität der 9S-Methodik reflektieren.</div>
+        <div id="closeList" class="list"></div>
+        <div class="grid">
+          <div><label>Abschlusskommunikation (Upload)</label><input id="s8Comm" type="file"></div>
+          <div><label>Kommentar</label><textarea id="s8Comment" placeholder="Team würdigen, Learnings, nächste Schritte …"></textarea></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTBAR -->
+    <div class="footbar">
+      <div class="inline tiny">
+        <span class="muted">Quality Gate:</span>
+        <span id="gateTxt" class="tag">S0 Pflichtfelder offen</span>
+      </div>
+      <div class="inline">
+        <button class="btn ghost" id="btnPrev">← Zurück</button>
+        <button class="btn primary" id="btnNext">Weiter →</button>
       </div>
     </div>
-
-    <!-- Sparziel-Projektion (interaktiv + Benchmarks) -->
-    <div class="panel">
-      <h3 style="margin:0 0 6px">What-if: Sparziel & Anlagevergleich</h3>
-      <div class="grid2">
-        <div><label>Monatlich sparen (€)</label><input type="number" id="msave" value="300" step="10"></div>
-        <div><label>Zinssatz p.a. (%) – eigenes Szenario</label><input type="number" id="rate" value="5" step="0.1"></div>
-        <div><label>Horizont (Jahre)</label><input type="number" id="years" value="10" step="1"></div>
-      </div>
-      <canvas id="proj" height="200" style="margin-top:8px"></canvas>
-      <div class="legend" id="projLegend" style="margin-top:6px"></div>
-      <div class="muted" id="projText" style="margin-top:6px"></div>
-    </div>
-
-    <div class="panel">
-      <h3 style="margin:0 0 6px">Kategorien-Breakdown</h3>
-      <ul id="breakdown" style="margin:0; padding-left:18px"></ul>
-    </div>
-
-    <div class="panel">
-      <h3 style="margin:0 0 6px">Maßnahmenplan</h3>
-      <ul id="plan" style="margin:0; padding-left:18px"></ul>
-    </div>
-
-    <div class="panel">
-      <h3 style="margin:0 0 6px">Optional: persönliche Beratung</h3>
-      <p class="muted" style="margin:0 0 8px">Wenn du möchtest, kannst du auf Basis dieser Bewertung 1:1-Beratungszeit buchen (gg. Aufpreis) – rein produktneutral.</p>
-      <a class="btn" href="mailto:hello@example.com?subject=Finanz-T%C3%9CV%20Beratung&body=Hallo%2C%20ich%20h%C3%A4tte%20gern%20eine%20Beratung%20zu%20meiner%20Analyse.">Beratung anfragen</a>
-    </div>
-
-    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px">
-      <button class="btn ghost" onclick="showPage('wizard'); go(1)">Eingaben ändern</button>
-      <button class="btn" onclick="showPage('landing')">Neu starten</button>
-    </div>
-  </section>
-
+  </main>
 </div>
 
 <script>
-/* ===== Helpers ===== */
-const byId = (id)=>document.getElementById(id);
-const euro = (n)=> (isFinite(n)? n:0).toLocaleString('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0});
-function sum(o, keys){ return keys.reduce((a,k)=>a+(+o[k]||0),0); }
+/* ------------------------ State & Helpers ------------------------ */
+const state = JSON.parse(localStorage.getItem('sari_v1')||'null') || seedState();
+const maturity = seedMaturity(); // demo subset, CSV import möglich
 
-/* ===== State (mit Defaults) ===== */
-let S = {
-  // Einnahmen
-  income:3200, otherInc:200,
-  // Fixkosten
-  rent:950, utilities:200, insPrem:60, telecom:40, transportFix:120, otherFix:50,
-  // Variabel
-  groceries:320, dining:120, leisure:120, subscriptions:25, transportVar:60, otherVar:40,
-  // Schulden & Notgroschen
-  debtMonthly:250, debtTotal:5000, emerg:6000, runwayTarget:6,
-  // Vermögen & Ziele
-  cash:1000, invest:5000, pension:0, realestate:0,
-  retire:2000, goal1:1000, goal2:5000, goal3:0,
-  // Sparziel-Projektion
-  msave:300, rate:5, years:10
-};
-const LS='finanzTuvSiteV1';
-
-/* ===== Navigation & Progress ===== */
-const steps = [1,2,3,4]; // step ids
-function showPage(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  byId(id).classList.add('active');
-  if(id === 'results'){ requestAnimationFrame(renderResults); }
-}
-function go(n){
-  steps.forEach(s=> byId('step'+s).style.display = (s===n)?'block':'none');
-  byId('stepNum').textContent = n;
-  byId('stepTotal').textContent = steps.length;
-  const p = Math.round((n-1)/(steps.length)*100);
-  byId('bar').style.width = p+'%';
-  byId('pct').textContent = p+'%';
-}
-function next(n){ persistFromDOM(); go(n); }
-
-/* ===== DOM <-> State ===== */
-function fillDefaults(){
-  Object.entries(S).forEach(([k,v])=>{
-    const el = byId(k); if(el) el.value = v;
-  });
-}
-function persistFromDOM(){
-  Object.keys(S).forEach(k=>{
-    const el = byId(k); if(!el) return;
-    S[k] = el.type==='number' ? (+el.value||0) : el.value;
-  });
-  localStorage.setItem(LS, JSON.stringify(S));
-}
-function resetDefaults(){
-  localStorage.removeItem(LS);
-  S = {
-    income:3200, otherInc:200,
-    rent:950, utilities:200, insPrem:60, telecom:40, transportFix:120, otherFix:50,
-    groceries:320, dining:120, leisure:120, subscriptions:25, transportVar:60, otherVar:40,
-    debtMonthly:250, debtTotal:5000, emerg:6000, runwayTarget:6,
-    cash:1000, invest:5000, pension:0, realestate:0,
-    retire:2000, goal1:1000, goal2:5000, goal3:0,
-    msave:300, rate:5, years:10
+function seedState(){
+  return {
+    meta:{title:'', level:'L3', ata:'', s:0,o:0,d:0,
+          roles:{sim:'', sponsor:'', leader:'', owner:'', ops:'', ppm:''},
+          dates:{first:'', customer:'', lineStop:'Nein'}},
+    gov:{icb:'', ppp:'', pp:'', poarm:'', early:false, riskL:'', riskS:'', just:''},
+    s0:{custDate:'', planFile:null, lineStop:'Nein', stockProof:'', stockFile:null},
+    s1:{leader:'', sponsor:'', owner:'', ops:'', mft:'', mom:null},
+    s2:{issue:'', supply:'', a5w2h:'', isnot:'', media:[], m1750:[]},
+    s3:{val:null, trace:null, trigger:'Nein', curative:'Nein'},
+    s4:{ish:{occ:[],non:[],sys:[]}, rc1:'', rc2:'', rc3:'', whys:[], proofs:[]},
+    s5:{pca:[]}, // {txt,owner,due,rc,metric,status}
+    s6:{eff:[]}, // mirrored from pca with evidence
+    s7:{look:null, sop:[], fmea:null},
+    s8:{checks:{eff:true, docs:true, lessons:true, why:true}, comm:null, comment:''},
+    view:'dashboard'
   };
-  fillDefaults();
 }
 
-/* ===== Landing buttons ===== */
-function loadDemo(){ resetDefaults(); showPage('wizard'); go(1); }
+function seedMaturity(){
+  // Demo-Subset (S0–S3). Vollständiges CSV kann importiert werden.
+  return {
+    S0:{requirements:[
+      "Customer innerhalb 1 Tag informiert",
+      "Formaler Containment-Plan in 3 Arbeitstagen",
+      "Produktion nur mit wirksamer Containment wieder starten ≤ 3 Tage"
+    ], benchmark:[
+      "Produktion mit effizienter Containment ≤ 24h wieder gestartet",
+      "Issue Description inkl. Kundenperspektive enthalten"
+    ]},
+    S1:{requirements:[
+      "MFT nominiert inkl. Operations",
+      "8D/9S Leader klar benannt",
+      "Sponsor eingebunden"
+    ], benchmark:[
+      "Top-Management Sponsorship aktiv",
+      "Supplier integriert (bei Sub-Tier Themen)",
+      "Operator/Inspektor vertreten"
+    ]},
+    S2:{requirements:[
+      "1 Objekt, 1 Defekt – faktenbasiert (5W2H)",
+      "Keine Vermischung von Symptom/RC",
+      "IS/IS NOT bei komplexen Fällen"
+    ], benchmark:[
+      "Problem Statement mit Kunden-Sicht",
+      "Lessons Learned als Input berücksichtigt"
+    ]},
+    S3:{requirements:[
+      "Wirksamkeit der Containment demonstriert",
+      "Full TOAC/Traceability gesichert",
+      "Curative Actions zeitgerecht umgesetzt"
+    ], benchmark:[
+      "Optimierte Containment ≤ 7 Tage",
+      "Wirksamkeit validiert (nicht nur implementiert)"
+    ]}
+  };
+}
 
-/* ===== Finish -> Analyse ===== */
-function finish(){ persistFromDOM(); showPage('results'); }
+function save(){ localStorage.setItem('sari_v1', JSON.stringify(state)); refreshAll(); }
+function $(sel){ return document.querySelector(sel); }
+function el(tag, attrs={}, children=[]){ const e=document.createElement(tag); Object.entries(attrs).forEach(([k,v])=> (k==='class'? e.className=v : e[k]=v)); children.forEach(c=> e.append(c)); return e; }
+function prettyDate(d){ return d? new Date(d).toLocaleDateString():'—'; }
+function daysBetween(a,b){ const x=new Date(a), y=new Date(b); if(!a||!b||isNaN(x)||isNaN(y)) return null; return Math.round((y-x)/(24*3600*1000)); }
+function todayISO(){ const t=new Date(); t.setHours(0,0,0,0); return t.toISOString().slice(0,10); }
+function computeRpn(){ const {s,o,d}=state.meta; const r=(+s||0)*(+o||0)*(+d||0); return isFinite(r)? r:0; }
+function currentLevel(){ return state.meta.level||'L3'; }
 
-/* ===== Analyse/Ergebnis ===== */
-function medal(x){ return x>=0.8?'gA':x>=0.6?'gB':x>=0.4?'gC':'gD'; }
+/* ------------------------ Navigation ------------------------ */
+const navButtons = document.querySelectorAll('aside .nav button[data-view]');
+navButtons.forEach(btn=> btn.addEventListener('click', ()=> show(btn.dataset.view)));
+function show(view){
+  state.view=view; save();
+  document.querySelectorAll('main [data-page]').forEach(s=> s.hidden = (s.dataset.page!==view));
+  navButtons.forEach(b=> b.classList.toggle('active', b.dataset.view===view));
+  refreshAll();
+}
+show(state.view);
 
-function renderResults(){
-  const incomeTotal = (+S.income||0)+(+S.otherInc||0);
-  const fixed = sum(S, ['rent','utilities','insPrem','telecom','transportFix','otherFix']);
-  const variable = sum(S, ['groceries','dining','leisure','subscriptions','transportVar','otherVar']);
-  const debtPay = +S.debtMonthly||0;
-  const totalExp = fixed + variable + debtPay;
-  const surplus = incomeTotal - totalExp;
-  const savingsRate = incomeTotal>0 ? surplus/incomeTotal : 0;
-  const dti = incomeTotal>0 ? debtPay/incomeTotal : 0;
-  const runwayMonths = totalExp>0 ? (+S.emerg||0)/totalExp : 0;
+/* ------------------------ Bind meta inputs ------------------------ */
+$('#metaTitle').value = state.meta.title;
+$('#metaTitle').addEventListener('input', e=> {state.meta.title=e.target.value; save();});
 
-  const expectedState = incomeTotal*0.40; // grobe Heuristik
-  const pensionGap = Math.max((+S.retire||0) - expectedState, 0);
-  const capNeed = pensionGap>0 ? pensionGap*12/0.035 : 0;
+$('#metaLevel').value = state.meta.level;
+$('#metaLevel').addEventListener('change', e=> {state.meta.level=e.target.value; save();});
 
-  const assets = (+S.cash||0)+(+S.invest||0)+(+S.pension||0)+(+S.realestate||0)+(+S.emerg||0);
-  const debts = (+S.debtTotal||0);
-  const net = assets - debts;
+$('#metaAta').value = state.meta.ata;
+$('#metaAta').addEventListener('input', e=> {state.meta.ata=e.target.value; save();});
 
-  // KPIs
-  byId('kpis').innerHTML = `
-    <div class="kpi"><div class="lab">Überschuss</div><div class="val">${euro(surplus)}</div><div class="muted">nach allen Ausgaben</div></div>
-    <div class="kpi"><div class="lab">Sparquote</div><div class="val">${Math.round(Math.max(0,savingsRate)*100)}%</div><div class="muted">vom Netto</div></div>
-    <div class="kpi"><div class="lab">Schuldenquote</div><div class="val">${Math.round(dti*100)}%</div><div class="muted">Rate/Netto</div></div>
-    <div class="kpi"><div class="lab">Runway</div><div class="val">${runwayMonths.toFixed(1)} Mo</div><div class="muted">Ziel: ${S.runwayTarget} Mo</div></div>
-    ${(+S.retire>0)? `<div class="kpi"><div class="lab">Rente (Heuristik)</div><div class="val">${euro(expectedState)}</div><div class="muted">40% vom Netto</div></div>`:''}
-    ${(+S.retire>0)? `<div class="kpi"><div class="lab">Rentenlücke</div><div class="val">${euro(pensionGap)}</div><div class="muted">Kapital ~ ${euro(capNeed)}</div></div>`:''}
-  `;
+['sevS','sevO','sevD'].forEach(id=>{
+  $('#'+id).value = state.meta[id.slice(3).toLowerCase()];
+  $('#'+id).addEventListener('input', e=> {state.meta[id.slice(3).toLowerCase()] = e.target.value; save();});
+});
 
-  // Bewertung
-  const grdSavings = savingsRate>=.2? 'A': savingsRate>=.1? 'B': savingsRate>0? 'C':'D';
-  const grdDTI = dti<=.2? 'A': dti<=.35? 'B': dti<=.5? 'C':'D';
-  const runFrac = Math.min((+S.runwayTarget>0? runwayMonths/(+S.runwayTarget):0),1);
-  byId('rating').innerHTML = `
-    <li> <span class="grade g${grdSavings}">${grdSavings}</span> Sparquote: ${Math.round(Math.max(0,savingsRate)*100)}% – Ziel mind. 10%, gut ab 20%.</li>
-    <li> <span class="grade g${grdDTI}">${grdDTI}</span> Schuldenquote (DTI): ${Math.round(dti*100)}% – < 20% top, 20–35% ok, > 35% hoch.</li>
-    <li> <span class="grade ${'g'+medal(runFrac).toUpperCase()}">${runFrac>=.8?'A':runFrac>=.6?'B':runFrac>=.4?'C':'D'}</span> Notgroschen: ${runwayMonths.toFixed(1)} Monate (Ziel ${S.runwayTarget}).</li>
-  `;
+/* Stammdaten & Rollen */
+const roleMap = {roleSim:'sim', roleSponsor:'sponsor', roleLeader:'leader', roleOwner:'owner', roleOps:'ops', rolePpm:'ppm'};
+Object.entries(roleMap).forEach(([id,key])=>{
+  $('#'+id).value = state.meta.roles[key]||'';
+  $('#'+id).addEventListener('input', e=> {state.meta.roles[key]=e.target.value; save();});
+});
+$('#dateFirst').value = state.meta.dates.first||'';
+$('#dateCustomer').value = state.meta.dates.customer||'';
+$('#lineStop').value = state.meta.dates.lineStop||'Nein';
+$('#dateFirst').addEventListener('change', e=> {state.meta.dates.first=e.target.value; save();});
+$('#dateCustomer').addEventListener('change', e=> {state.meta.dates.customer=e.target.value; save();});
+$('#lineStop').addEventListener('change', e=> {state.meta.dates.lineStop=e.target.value; save();});
 
-  // Donut
-  const pie = byId('pie').getContext('2d');
-  pie.canvas.width = pie.canvas.clientWidth*devicePixelRatio;
-  pie.canvas.height = pie.canvas.clientHeight*devicePixelRatio;
-  pie.clearRect(0,0,pie.canvas.width,pie.canvas.height);
-  const data = [
-    {n:'Fixkosten', v:Math.max(fixed,0), c:'#60a5fa'},
-    {n:'Variabel', v:Math.max(variable,0), c:'#a78bfa'},
-    {n:'Schulden', v:Math.max(debtPay,0), c:'#fb923c'},
-    {n:'Überschuss', v:Math.max(surplus,0), c:'#34d399'}
-  ];
-  const total = data.reduce((a,b)=>a+b.v,0) || 1;
-  const w = pie.canvas.width, h = pie.canvas.height, cx=w/2, cy=h/2, r=Math.min(w,h)/2 - 12*devicePixelRatio;
-  let start=-Math.PI/2;
-  data.forEach(d=>{
-    const ang = (d.v/total)*Math.PI*2;
-    pie.beginPath(); pie.arc(cx,cy,r,start,start+ang);
-    pie.strokeStyle = d.c; pie.lineWidth = Math.max(18*devicePixelRatio, r*0.25); pie.lineCap='round'; pie.stroke();
-    start+=ang;
+/* Governance */
+[['govIcb','icb'],['govPpp','ppp'],['govPp','pp'],['govPoarm','poarm']].forEach(([id,k])=>{
+  $('#'+id).value = state.gov[k]||'';
+  $('#'+id).addEventListener('change', e=> {state.gov[k]=e.target.value; save();});
+});
+$('#rcRiskL').value = state.gov.riskL||'';
+$('#rcRiskS').value = state.gov.riskS||'';
+$('#rcJust').value = state.gov.just||'';
+$('#rcRiskL').addEventListener('input', e=> {state.gov.riskL=e.target.value; save();});
+$('#rcRiskS').addEventListener('input', e=> {state.gov.riskS=e.target.value; save();});
+$('#rcJust').addEventListener('input', e=> {state.gov.just=e.target.value; save();});
+$('#btnMarkEarly').addEventListener('click', ()=> { state.gov.early = !state.gov.early; save(); });
+
+/* S0 */
+$('#s0CustomerDate').value = state.s0.custDate||'';
+$('#s0CustomerDate').addEventListener('change', e=> {state.s0.custDate=e.target.value; save();});
+$('#s0LineStop').value = state.s0.lineStop||'Nein';
+$('#s0LineStop').addEventListener('change', e=> {state.s0.lineStop=e.target.value; save();});
+$('#s0StockProof').value = state.s0.stockProof||'';
+$('#s0StockProof').addEventListener('input', e=> {state.s0.stockProof=e.target.value; save();});
+$('#s0PlanFile').addEventListener('change', e=> handleFile(e.target.files[0], f=> {state.s0.planFile=f; save();}));
+$('#s0StockFile').addEventListener('change', e=> handleFile(e.target.files[0], f=> {state.s0.stockFile=f; save();}));
+
+/* S1 */
+['s1Leader','s1Sponsor','s1Owner','s1Ops','s1Mft'].forEach(id=>{
+  $('#'+id).value = state.s1[id.slice(2).toLowerCase()]||'';
+  $('#'+id).addEventListener('input', e=> {state.s1[id.slice(2).toLowerCase()] = e.target.value; save();});
+});
+$('#s1MoM').addEventListener('change', e=> handleFile(e.target.files[0], f=> {state.s1.mom=f; save();}));
+
+/* S2 */
+$('#s2Issue').value = state.s2.issue||'';
+$('#s2Supply').value = state.s2.supply||'';
+$('#s2_5w2h').value = state.s2.a5w2h||'';
+$('#s2IsIsNot').value = state.s2.isnot||'';
+['s2Issue','s2Supply','s2_5w2h','s2IsIsNot'].forEach(id=>{
+  $('#'+id).addEventListener('input', e=> { 
+    const key = id==='s2_5w2h'?'a5w2h': (id==='s2IsIsNot'?'isnot': id.slice(2));
+    state.s2[key]=e.target.value; 
+    if(id==='s2Issue') suggestM1750();
+    save();
   });
-  byId('legend').innerHTML = data.map(d=>`<span><span class="dot" style="background:${d.c}"></span> ${d.n}: <b>${euro(d.v)}</b></span>`).join(' ');
-  byId('sumTxt').textContent = `Netto ${euro(incomeTotal)} · Ausgaben ${euro(totalExp)} · Überschuss ${euro(Math.max(surplus,0))}`;
+});
+$('#s2Media').addEventListener('change', e=>{
+  const files=[...e.target.files];
+  let count=0;
+  files.forEach(file=> handleFile(file, f=> { state.s2.media.push(f); count++; if(count===files.length) save(); }));
+});
 
-  // Sparkline
-  const sp = byId('spark').getContext('2d');
-  sp.canvas.width = sp.canvas.clientWidth*devicePixelRatio; sp.canvas.height = sp.canvas.clientHeight*devicePixelRatio;
-  sp.clearRect(0,0,sp.canvas.width,sp.canvas.height);
-  const months=12, monthly=Math.max(surplus,0);
-  const arr = Array.from({length:months}, (_,i)=> monthly*(i+1));
-  const max = Math.max(...arr, 1);
-  sp.lineWidth = 2*devicePixelRatio; sp.strokeStyle = '#22d3ee';
-  sp.beginPath();
-  arr.forEach((v,i)=>{
-    const x = (i/(months-1))*(sp.canvas.width-6*devicePixelRatio) + 3*devicePixelRatio;
-    const y = sp.canvas.height - (v/max)*(sp.canvas.height-6*devicePixelRatio) - 3*devicePixelRatio;
-    if(i===0) sp.moveTo(x,y); else sp.lineTo(x,y);
+/* S3 */
+$('#s3ValReport').addEventListener('change', e=> handleFile(e.target.files[0], f=> {state.s3.val=f; save();}));
+$('#s3Trace').addEventListener('change', e=> handleFile(e.target.files[0], f=> {state.s3.trace=f; save();}));
+$('#s3Trigger').value = state.s3.trigger||'Nein';
+$('#s3Curative').value = state.s3.curative||'Nein';
+$('#s3Trigger').addEventListener('change', e=> {state.s3.trigger=e.target.value; save();});
+$('#s3Curative').addEventListener('change', e=> {state.s3.curative=e.target.value; save();});
+
+/* S4 Ishikawa + 5Why */
+function addIsh(col,inputId){const v=$(inputId).value.trim(); if(!v) return; state.s4.ish[col].push(v); $(inputId).value=''; save();}
+$('#addOcc').addEventListener('click', ()=> addIsh('occ','#occInput'));
+$('#addNon').addEventListener('click', ()=> addIsh('non','#nonInput'));
+$('#addSys').addEventListener('click', ()=> addIsh('sys','#sysInput'));
+['rc1','rc2','rc3'].forEach(id=> { $('#'+id).value=state.s4[id]||''; $('#'+id).addEventListener('input', e=> {state.s4[id]=e.target.value; save();}); });
+$('#addWhy').addEventListener('click', addWhy);
+$('#whyInput').addEventListener('keydown', e=> { if(e.key==='Enter'){ e.preventDefault(); addWhy(); }});
+function addWhy(){ const v=$('#whyInput').value.trim(); if(!v) return; state.s4.whys.push({q:v,depth: state.s4.whys.length}); $('#whyInput').value=''; save(); }
+$('#s4Proof').addEventListener('change', e=>{
+  const files=[...e.target.files]; let count=0;
+  files.forEach(file=> handleFile(file, f=> { state.s4.proofs.push(f); count++; if(count===files.length) save(); }));
+});
+
+/* S5 PCA */
+$('#addPca').addEventListener('click', ()=> {
+  state.s5.pca.push({txt:'',owner:'',due:'',rc:'RC1',metric:'',status:'Offen', evidence:null});
+  syncEffRows(); save();
+});
+function syncEffRows(){ state.s6.eff = state.s5.pca.map((p,i)=> ({i, txt:p.txt, implemented:false, evidence:null, effective:false})); }
+
+/* S6 */
+function toggleEff(i, key){ state.s6.eff[i][key]=!state.s6.eff[i][key]; save(); }
+
+/* S7 */
+$('#s7Look').addEventListener('change', e=> handleFile(e.target.files[0], f=> {state.s7.look=f; save();}));
+$('#s7Sop').addEventListener('change', e=>{
+  const files=[...e.target.files]; let count=0;
+  files.forEach(file=> handleFile(file, f=> { state.s7.sop.push(f); count++; if(count===files.length) save(); }));
+});
+$('#s7Fmea').addEventListener('change', e=> handleFile(e.target.files[0], f=> {state.s7.fmea=f; save();}));
+
+/* S8 */
+const closeItems = [
+  ['eff','Wirksamkeit jeder Maßnahme belegt'],
+  ['docs','Dokumente vollständig & abgelegt'],
+  ['lessons','Lessons Learned integriert'],
+  ['why','5-Whys zeigt tatsächliche RC']
+];
+function renderCloseList(){
+  const host = $('#closeList'); host.innerHTML='';
+  closeItems.forEach(([k,label])=>{
+    const id='cl_'+k;
+    const wrap=el('div',{className:'row'},[
+      el('input',{type:'checkbox', id, checked: !!state.s8.checks[k]}),
+      el('label',{htmlFor:id, innerText: label})
+    ]);
+    host.append(wrap);
+    wrap.querySelector('input').addEventListener('change', e=> {state.s8.checks[k]=e.target.checked; save();});
   });
-  sp.stroke();
-  const grd = sp.createLinearGradient(0,0,0,sp.canvas.height);
-  grd.addColorStop(0,'rgba(34,211,238,.35)'); grd.addColorStop(1,'rgba(34,211,238,0)');
-  sp.lineTo(sp.canvas.width-3*devicePixelRatio, sp.canvas.height-3*devicePixelRatio);
-  sp.lineTo(3*devicePixelRatio, sp.canvas.height-3*devicePixelRatio);
-  sp.closePath(); sp.fillStyle = grd; sp.fill();
+}
+$('#s8Comm').addEventListener('change', e=> handleFile(e.target.files[0], f=> {state.s8.comm=f; save();}));
+$('#s8Comment').value = state.s8.comment||'';
+$('#s8Comment').addEventListener('input', e=> {state.s8.comment=e.target.value; save();});
 
-  // Bars
-  const bars = byId('bars').getContext('2d');
-  bars.canvas.width = bars.canvas.clientWidth*devicePixelRatio; bars.canvas.height = bars.canvas.clientHeight*devicePixelRatio;
-  bars.clearRect(0,0,bars.canvas.width,bars.canvas.height);
-  const vals=[{n:'Vermögen',v:assets,c:'#34d399'},{n:'Schulden',v:debts,c:'#fb7185'},{n:'Netto',v:net,c:'#22d3ee'}];
-  const maxb = Math.max(...vals.map(x=>Math.abs(x.v)),1);
-  const bw = Math.floor((bars.canvas.width-40*devicePixelRatio)/vals.length);
-  vals.forEach((x,i)=>{
-    const x0 = 20*devicePixelRatio + i*bw + bw*0.15, wbar = bw*0.7;
-    const y0 = bars.canvas.height-20*devicePixelRatio;
-    const hbar = Math.round((Math.abs(x.v)/maxb)*(bars.canvas.height-50*devicePixelRatio));
-    bars.fillStyle = x.c;
-    bars.fillRect(x0, y0-hbar, wbar, hbar);
-    bars.fillStyle = '#94a3b8'; bars.font = `${12*devicePixelRatio}px system-ui`; bars.fillText(x.n, x0, y0+12*devicePixelRatio);
-  });
-  byId('nwText').textContent = `Nettovermögen: ${euro(net)} (Vermögen ${euro(assets)} / Schulden ${euro(debts)}).`;
+/* ------------------------ File Handling ------------------------ */
+function handleFile(file, cb){
+  if(!file) return cb(null);
+  const max=500*1024; // 500KB
+  const reader = new FileReader();
+  reader.onload = ()=> {
+    const data = reader.result;
+    const payload = (file.size<=max && typeof data==='string') ? data : null; // store DataURL if small
+    cb({name:file.name, size:file.size, type:file.type, data:payload, ts: Date.now()});
+  };
+  reader.onerror = ()=> cb({name:file.name,size:file.size,type:file.type,data:null,ts:Date.now()});
+  reader.readAsDataURL(file);
+}
 
-  // Breakdown
-  const cats = [
-    ['Fixkosten', fixed],
-    ['Variabel', variable],
-    ['Schulden', debtPay]
-  ].filter(([_,v])=>v>0).sort((a,b)=>b[1]-a[1]);
-  byId('breakdown').innerHTML = cats.map(([n,v])=>{
-    const p = totalExp? Math.round(v/totalExp*100):0;
-    return `<li>${n}: <b>${euro(v)}</b> (${p}%)</li>`;
-  }).join('');
+/* ------------------------ KPI & Rendering ------------------------ */
+function refreshAll(){
+  // KPI
+  const rpn=computeRpn(); $('#kpiRpn').innerText=rpn;
+  const lvl=currentLevel(); $('#kpiLevel').innerText=lvl;
+  const totalSteps=9; const doneSteps = ['s0','s1','s2','s3','s4','s5','s6','s7','s8'].filter(isStepDone).length;
+  const pct = Math.round((doneSteps/totalSteps)*100);
+  $('#kpiProgress').style.width = pct+'%'; $('#kpiProgressTxt').innerText=pct+'%';
 
-  // Plan
-  const plan=[];
-  if(surplus<0) plan.push('Defizit: Fixkosten & variable Ausgaben prüfen, Einnahmen erhöhen, zuerst Überschuss herstellen.');
-  else if(savingsRate<.10) plan.push('Sparquote > 10% anpeilen (Dauerauftrag direkt nach Geldeingang).');
-  else if(savingsRate<.20) plan.push('Solide – mittelfristig Richtung 20% gehen.');
-  else plan.push('Sehr gute Sparquote – Kurs halten.');
-  if(runwayMonths < (+S.runwayTarget||6)){
-    const need = totalExp*(+S.runwayTarget||6) - (+S.emerg||0);
-    plan.push(`Notgroschen auffüllen: fehlen ca. ${euro(Math.max(need,0))} für ${S.runwayTarget} Monate.`);
+  // Status lights
+  setLight('#stContain', isStepDone('s3'));
+  setLight('#stRca', !!(state.s4.rc1 && state.s4.rc2));
+  setLight('#stPca', state.s5.pca.length>0);
+  setLight('#stClose', isStepDone('s8'));
+
+  // Overdue actions
+  const today=todayISO();
+  const overdue = state.s5.pca.filter(p=> p.due && p.status!=='Erledigt' && p.due<today).length;
+  $('#kpiOverdue').innerText = overdue;
+  $('#tagEarly').hidden = !state.gov.early;
+
+  // Maturity guard texts
+  renderGridHints();
+  suggestM1750();
+
+  // S0 urgency
+  renderS0Urgency();
+
+  // RCA boards
+  renderIsh();
+
+  // 5Whys
+  renderWhys();
+
+  // PCA rows + S6 effectiveness
+  renderPca();
+  renderEff();
+
+  // Maturity checklist
+  renderMaturityChecklist();
+
+  // ID Card
+  renderIdCard();
+
+  // Quality Gate + Next/Prev enablement
+  renderGate();
+
+  // Close list
+  renderCloseList();
+}
+function setLight(sel, ok){ const el=$(sel); el.classList.toggle('ok', !!ok); el.classList.toggle('bad', !ok); }
+function isStepDone(key){
+  switch(key){
+    case 's0': return !!state.s0.custDate && !!state.s0.planFile;
+    case 's1': return !!state.s1.leader && !!state.s1.sponsor && !!state.s1.owner && !!state.s1.ops;
+    case 's2': return !!state.s2.issue && !!state.s2.a5w2h;
+    case 's3': return !!state.s3.val && state.s3.curative==='Ja';
+    case 's4': return !!(state.s4.rc1 && state.s4.rc2);
+    case 's5': return state.s5.pca.length>0;
+    case 's6': return state.s6.eff.every(e=> e.implemented && e.effective);
+    case 's7': return (state.meta.level==='L1' || computeRpn()>=300) ? (!!state.s7.look && !!state.s7.fmea) : true;
+    case 's8': return Object.values(state.s8.checks).every(v=> !!v);
+    default: return false;
   }
-  if(dti>0.35) plan.push('Schuldenquote >35%: Tilgung/Umschuldung prüfen; variable Ausgaben senken.');
-  if(pensionGap>0) plan.push(`Rentenlücke ~ ${euro(pensionGap)}/Monat → Kapitalbedarf ~ ${euro(capNeed)} (3,5%-Entnahme).`);
-  ['goal1','goal2','goal3'].forEach((g,i)=>{ const v=+S[g]||0; if(v>0) plan.push(`Ziel ${i+1}: ${euro(v)} – feste Monatsrate & Zieltermin planen.`); });
-  if(plan.length===0) plan.push('Gesamteindruck: solide – regelmäßig aktualisieren.');
-  byId('plan').innerHTML = plan.map(t=>`<li>${t}</li>`).join('');
+}
+function renderGate(){
+  const order=['s0','s1','s2','s3','s4','s5','s6','s7','s8'];
+  const currentIndex = Math.max(0, order.indexOf(state.view.startsWith('s')? state.view : 's0'));
+  let block = order.find(k=> !isStepDone(k));
+  const gateTxt = block? `Nächster Quality-Gate: ${block.toUpperCase()} abschließen` : 'Alle Gates erfüllt ✔';
+  $('#gateTxt').innerText = gateTxt;
 
-  // Projection init
-  ['msave','rate','years'].forEach(id=>{
-    const el = byId(id); if(!el) return;
-    el.value = S[id];
-    if(!el._bound){ el.addEventListener('input', renderProjection); el._bound = true; }
-  });
-  requestAnimationFrame(renderProjection);
+  // Prev/Next buttons behavior
+  $('#btnPrev').onclick = ()=> { const i=Math.max(0, currentIndex-1); show(order[i]); };
+  $('#btnNext').onclick = ()=> {
+    // enforce wizard forward only if current is done (except dashboard/meta/governance)
+    const cur = order[currentIndex];
+    if(['dashboard','meta','governance','idcard','maturity'].includes(state.view)) { show('s0'); return; }
+    if(!isStepDone(cur)) { alert('Bitte Pflichtfelder für '+cur.toUpperCase()+' erfüllen, bevor es weitergeht.'); return; }
+    const i=Math.min(order.length-1, currentIndex+1); show(order[i]);
+  };
 }
 
-/* ===== Sparziel-/Benchmark-Projektion ===== */
-function renderProjection(){
-  const m = Math.max(+byId('msave')?.value || +S.msave || 0, 0);
-  const rPct = +byId('rate')?.value || +S.rate || 0;
-  const y = Math.max(+byId('years')?.value || +S.years || 1, 1);
-  S.msave = m; S.rate = rPct; S.years = y; localStorage.setItem(LS, JSON.stringify(S));
+/* Hints from Maturity subset or CSV */
+function renderGridHints(){
+  [['gridS0','S0'],['gridS1','S1'],['gridS2','S2'],['gridS3','S3']].forEach(([id,step])=>{
+    const host = $('#'+id); if(!host) return;
+    const data = maturity[step];
+    host.innerHTML = data? (
+      `<b>${step} • Maturity Guidance</b><div class="grid">
+         <div><div class="tiny muted">Requirements</div><ul>${data.requirements.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+         <div><div class="tiny muted">Benchmark</div><ul>${data.benchmark.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+       </div>`
+    ) : '<span class="muted tiny">Keine Guidance verfügbar – bitte CSV importieren.</span>';
+  });
+}
 
-  const n = Math.round(y*12);
-  const scen = [
-    {name:'Einzahlung (0%)', r:0, color:'#94a3b8'},
-    {name:`Szenario ${rPct}%`, r:rPct/100, color:'#22d3ee'},
-    {name:'2% p.a.', r:0.02, color:'#60a5fa'},
-    {name:'5% p.a.', r:0.05, color:'#34d399'},
-    {name:'7% p.a.', r:0.07, color:'#fb923c'}
+/* S0 urgency due (1 day) */
+function renderS0Urgency(){
+  const first = state.meta.dates.first;
+  const cust = state.s0.custDate || state.meta.dates.customer;
+  const today = todayISO();
+  if(!first){ $('#s0DueTxt').innerText='„First Event“ fehlt.'; return; }
+  const d = daysBetween(first, cust || today);
+  let txt='–';
+  if(!cust){ txt = `Noch keine Kundeninfo. ${d>1? 'Überfällig um '+(d-1)+' Tag(e).':'Frist läuft – '+(1-d)+' Tag(e) verbleiben.'}`; }
+  else { txt = `Kundeninfo nach ${d} Tag(en). ${d<=1? '✔ Frist eingehalten':'⚠ Frist überschritten'}`; }
+  $('#s0DueTxt').innerText = txt;
+}
+
+/* Ishikawa & 5Whys */
+function renderIsh(){
+  const cols=[['ishikawa-occ','occ'],['ishikawa-non','non'],['ishikawa-sys','sys']];
+  cols.forEach(([id,key])=>{
+    const host=$('#'+id); host.innerHTML='';
+    state.s4.ish[key].forEach((v,i)=>{
+      const row=el('div',{className:'row'},[
+        el('input',{value:v, oninput:(e)=>{state.s4.ish[key][i]=e.target.value; save();}}),
+        el('button',{className:'btn', innerText:'🗑', onclick:()=>{state.s4.ish[key].splice(i,1); save();}})
+      ]);
+      host.append(row);
+    });
+  });
+}
+function renderWhys(){
+  const host=$('#whys'); host.innerHTML='';
+  state.s4.whys.forEach((w,i)=>{
+    const row=el('div',{className:'row'},[
+      el('span',{className:'tiny muted', innerText:(i+1)+'. '}),
+      el('input',{value:w.q, oninput:(e)=>{state.s4.whys[i].q=e.target.value; save();}}),
+      el('button',{className:'btn', innerText:'▲', onclick:()=>{ if(i>0){ const t=state.s4.whys[i-1]; state.s4.whys[i-1]=w; state.s4.whys[i]=t; save(); }}}),
+      el('button',{className:'btn', innerText:'🗑', onclick:()=>{state.s4.whys.splice(i,1); save();}})
+    ]);
+    host.append(row);
+  });
+}
+
+/* PCA table */
+function renderPca(){
+  const body = $('#pcaRows'); body.innerHTML='';
+  state.s5.pca.forEach((p,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input value="${p.txt||''}" placeholder="Aktion …"></td>
+      <td><input value="${p.owner||''}" placeholder="Owner …"></td>
+      <td><input type="date" value="${p.due||''}"></td>
+      <td>
+        <select>
+          <option ${p.rc==='RC1'?'selected':''}>RC1</option>
+          <option ${p.rc==='RC2'?'selected':''}>RC2</option>
+          <option ${p.rc==='RC3'?'selected':''}>RC3</option>
+        </select>
+      </td>
+      <td><input value="${p.metric||''}" placeholder="z.B. ppm↓, Cpk↑ …"></td>
+      <td>
+        <select>
+          <option ${p.status==='Offen'?'selected':''}>Offen</option>
+          <option ${p.status==='In Arbeit'?'selected':''}>In Arbeit</option>
+          <option ${p.status==='Erledigt'?'selected':''}>Erledigt</option>
+        </select>
+      </td>
+      <td><button class="btn">🗑</button></td>
+    `;
+    // bindings
+    const [iTxt,iOwner,iDue,iRc,iMet,iStat,iDel] = tr.querySelectorAll('input,select,button');
+    iTxt.oninput = e=> {p.txt=e.target.value; syncEffRows(); save();};
+    iOwner.oninput = e=> {p.owner=e.target.value; save();};
+    iDue.onchange = e=> {p.due=e.target.value; save();};
+    iRc.onchange = e=> {p.rc=e.target.value; save();};
+    iMet.oninput = e=> {p.metric=e.target.value; save();};
+    iStat.onchange = e=> {p.status=e.target.value; save();};
+    iDel.onclick = ()=> { state.s5.pca.splice(i,1); syncEffRows(); save(); };
+    body.append(tr);
+  });
+}
+
+/* Effectiveness list */
+function renderEff(){
+  const host = $('#effRows'); host.innerHTML='';
+  if(!state.s6.eff.length) syncEffRows();
+  state.s6.eff.forEach((e,i)=>{
+    const row = el('div',{className:'row'},[
+      el('input',{type:'checkbox', checked:e.implemented, onchange:()=>toggleEff(i,'implemented')}),
+      el('span',{innerText: state.s5.pca[i]?.txt || '(Maßnahme)'}),
+      el('span',{className:'muted tiny', innerText:'•'}),
+      el('label',{className:'tiny'}, ['Wirksam? ']),
+      el('input',{type:'checkbox', checked:e.effective, onchange:()=>toggleEff(i,'effective')}),
+    ]);
+    host.append(row);
+  });
+}
+
+/* Maturity Checklist (lightweight, demo) */
+function renderMaturityChecklist(){
+  const items = [
+    ['S0','Customer ≤ 1 Tag informiert', !!state.s0.custDate && withinDays(state.meta.dates.first,state.s0.custDate,1)],
+    ['S1','MFT inkl. Ops & Sponsor gesetzt', !!state.s1.ops && !!state.s1.sponsor],
+    ['S2','5W2H & 1 Objekt/1 Defekt', !!state.s2.a5w2h && !!state.s2.issue],
+    ['S3','Wirksamkeit Containment nachgewiesen', !!state.s3.val],
+    ['S4','RC1 + RC2 getrennt definiert', !!state.s4.rc1 && !!state.s4.rc2],
+    ['S5','PCA plan verknüpft (RC1/2/3)', state.s5.pca.some(p=>['RC1','RC2','RC3'].includes(p.rc))],
+    ['S6','Effektivität jeder Maßnahme belegt', state.s6.eff.every(e=> e.effective)],
+    ['S7','FMEA/SOP aktualisiert (falls L1/Top Irritant)', state.meta.level==='L1' ? (!!state.s7.fmea): true],
+    ['S8','Abschluss-Checkliste komplett', Object.values(state.s8.checks).every(v=>v)]
   ];
-
-  // Build series
-  const series = scen.map(s=>{
-    const rm = Math.pow(1+s.r, 1/12)-1;
-    let v=0; const arr=[];
-    for(let i=1;i<=n;i++){ v = v*(1+rm)+m; arr.push(v); }
-    return {...s, arr};
+  const host = $('#maturityList'); host.innerHTML='';
+  items.forEach(([step,label,ok])=>{
+    const row=el('div',{className:'row'},[
+      el('span',{className:'tag', innerText:step}),
+      el('span',{innerText:label}),
+      el('span',{className:'status '+(ok?'ok':'bad')},[el('i',{}), el('b',{innerText: ok?'OK':'Offen'})])
+    ]);
+    host.append(row);
   });
+}
+function withinDays(a,b,days){ const d=daysBetween(a,b); return d!==null && d<=days; }
 
-  const c = byId('proj').getContext('2d');
-  c.canvas.width = c.canvas.clientWidth*devicePixelRatio;
-  c.canvas.height = c.canvas.clientHeight*devicePixelRatio;
-  c.clearRect(0,0,c.canvas.width,c.canvas.height);
-
-  const vmax = Math.max(...series.map(s=> s.arr.at(-1) || 1),1);
-  const pad = 6*devicePixelRatio;
-  function draw(arr, color){
-    c.lineWidth = 2*devicePixelRatio; c.strokeStyle=color; c.beginPath();
-    arr.forEach((val,i)=>{
-      const x = (i/(arr.length-1))*(c.canvas.width-2*pad)+pad;
-      const y = c.canvas.height - (val/vmax)*(c.canvas.height-2*pad) - pad;
-      if(i===0) c.moveTo(x,y); else c.lineTo(x,y);
-    }); c.stroke();
-  }
-  series.forEach(s=> draw(s.arr, s.color));
-
-  const base = series[0].arr.at(-1)||0;
-  const mine = series[1].arr.at(-1)||0;
-  byId('projText').textContent = `Nach ${y} Jahren: Einzahlung ${euro(base)} · dein Szenario ${euro(mine)} (Zins-Ertrag ~ ${euro(Math.max(mine-base,0))}).`;
-  byId('projLegend').innerHTML = series.map(s=>`<span class="item"><span class="dot" style="background:${s.color}"></span>${s.name}</span>`).join(' ');
+/* ID Card */
+function renderIdCard(){
+  const c = $('#idCardContainer');
+  const rpn = computeRpn();
+  const lvl = currentLevel();
+  c.innerHTML = `
+    <div class="card print-only">
+      <h2>ID-Card</h2>
+    </div>
+    <div class="grid">
+      <div>
+        <label><b>Titel</b></label>
+        <div>${state.meta.title||'—'}</div>
+      </div>
+      <div class="grid">
+        <div><label><b>Level</b></label><div>${lvl}</div></div>
+        <div><label><b>ATA</b></label><div>${state.meta.ata||'—'}</div></div>
+      </div>
+      <div class="grid">
+        <div><label><b>S/O/D</b></label><div>${state.meta.s||0}/${state.meta.o||0}/${state.meta.d||0}</div></div>
+        <div><label><b>RPN</b></label><div>${rpn}</div></div>
+      </div>
+      <div><label><b>Problem Statement</b></label><div>${(state.s2.issue||'—').replace(/\n/g,'<br>')}</div></div>
+      <div class="grid">
+        <div><label><b>RC1 (Occurrence)</b></label><div>${state.s4.rc1||'—'}</div></div>
+        <div><label><b>RC2 (Non-Detection)</b></label><div>${state.s4.rc2||'—'}</div></div>
+        <div><label><b>RC3 (Systemic)</b></label><div>${state.s4.rc3||'—'}</div></div>
+      </div>
+      <div>
+        <label><b>PCA Top-3</b></label>
+        <ol>${state.s5.pca.slice(0,3).map(p=>`<li>${p.txt||'—'} <span class="muted tiny">(Owner: ${p.owner||'—'}, Fällig: ${prettyDate(p.due)})</span></li>`).join('')||'<li>—</li>'}</ol>
+      </div>
+      <div class="grid">
+        <div><label><b>First Event</b></label><div>${prettyDate(state.meta.dates.first)}</div></div>
+        <div><label><b>Kundeninfo</b></label><div>${prettyDate(state.s0.custDate||state.meta.dates.customer)}</div></div>
+      </div>
+    </div>
+  `;
 }
 
-/* ===== Init ===== */
-try{ const saved = JSON.parse(localStorage.getItem(LS)||'null'); if(saved) S = {...S, ...saved}; }catch(e){}
-fillDefaults();
-go(1);
+/* M1750 GEN Keyword Heuristic (demo) */
+const GEN_MAP = [
+  {key:/\bfod\b|foreign\s*object/i, code:'GEN-001', title:'FOD', why:'Schlüsselwort „FOD“/„foreign object“ erkannt.'},
+  {key:/incorrect|wrong|vertauscht|verdreht|assembly|montage/i, code:'GEN-004', title:'Incorrect Assembly', why:'Schlüsselwörter „incorrect / Assembly / Montage“.'},
+  {key:/torque|anzug|drehmoment/i, code:'GEN-010', title:'Torque / Fastener', why:'Drehmoment/Anzug erwähnt.'},
+  {key:/corrosion|korrosion/i, code:'GEN-012', title:'Corrosion', why:'Korrosion erkannt.'},
+  {key:/leak|leakage|leck/i, code:'GEN-021', title:'Leakage', why:'Leckage-Hinweis.'},
+  {key:/label|marking|kennzeichnung/i, code:'GEN-031', title:'Marking/Labeling', why:'Kennzeichnung/Label.'}
+];
+function suggestM1750(){
+  const t = (state.s2.issue||'') + ' ' + (state.s2.supply||'');
+  const hits = GEN_MAP.filter(x=> x.key.test(t)).slice(0,3);
+  state.s2.m1750 = hits.map(h=> ({code:h.code,title:h.title,why:h.why}));
+  const host = $('#s2M1750');
+  host.innerHTML = hits.length? (
+    '<b>Vorschläge:</b> ' + hits.map(h=> `<span class="pill">${h.code} – ${h.title}</span>`).join(' ') +
+    `<div class="tiny muted">Begründung: ${hits.map(h=>h.why).join(' • ')}</div>`
+  ) : '<span class="muted tiny">Keine Treffer – Engineering Judgement erforderlich.</span>';
+}
+
+/* Import/Export */
+$('#btnExport').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=(state.meta.title||'sari')+'.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+$('#btnImport').addEventListener('click', ()=> $('#importFile').click());
+$('#importFile').addEventListener('change', e=>{
+  const file = e.target.files[0]; if(!file) return;
+  const fr=new FileReader();
+  fr.onload = ()=> { Object.assign(state, JSON.parse(fr.result)); save(); alert('Import erfolgreich.'); };
+  fr.readAsText(file);
+});
+$('#btnNewSari').addEventListener('click', ()=>{
+  if(confirm('Neues SARI beginnen? Ungespeicherte Änderungen werden überschrieben.')){ 
+    const fresh=seedState(); fresh.meta.level = state.meta.level; // keep default level
+    localStorage.setItem('sari_v1', JSON.stringify(fresh)); location.reload();
+  }
+});
+
+/* CSV Grid Import (very simple parser) */
+$('#btnGridImport').addEventListener('click', ()=> $('#gridFile').click());
+$('#gridFile').addEventListener('change', e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const fr=new FileReader();
+  fr.onload = ()=> {
+    // Expect: first column contains step names like "S0", "S1" blocks; we only extract "Requirements" and "Benchmark" strings heuristically.
+    const text = fr.result;
+    const m = {};
+    ['S0','S1','S2','S3','S4','S5','S6','S7','S8'].forEach(S=>{
+      const block = text.split('\n').filter(line=> line.includes(S)).join('\n');
+      if(block){
+        m[S]={requirements:[`Guidance für ${S} aus CSV geladen.`], benchmark:[`Benchmark-Hinweis für ${S} …`]};
+      }
+    });
+    Object.assign(maturity, m);
+    renderGridHints();
+    alert('Maturity Grid geladen (heuristisch). Für präzise Zuordnung im echten System strukturierte CSV/JSON verwenden.');
+  };
+  fr.readAsText(file);
+});
+
+/* ------------------------ INIT ------------------------ */
+refreshAll();
+
+/* Keyboard shortcuts */
+document.addEventListener('keydown', e=>{
+  if(e.ctrlKey && e.key.toLowerCase()==='s'){ e.preventDefault(); save(); alert('Gespeichert.'); }
+});
 </script>
 </body>
 </html>
